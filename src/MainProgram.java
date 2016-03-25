@@ -59,8 +59,6 @@ import java.util.List;
 import BasicBehavior.*;
 import BasicStructures.*;
 import DrawData.*;
-import GraphAlgorithm.*;
-import GraphData.*;
 import MovementStructures.*;
 //import OldFile.*;
 import Variables.GlobalSetting;
@@ -90,37 +88,13 @@ public class MainProgram extends PApplet{
 	private ColorVectorRGB backgroundColor;
 	private CharacterDrop character;
 	
-	//private Seek_Steering_New Seek;
-	
-	private Seek Seek;
-	
 	private Vector2 originalPoint;
 	private Vector2 initialTarget;
 	
 	//Seek function
-	//private KinematicStructure tempK;
-	//private KinematicBehavior tempKB;
-	//private Seek_Steering tempS;
-	private float maxVelocity;
-	
-	private ResultChange tempResult;
-	
+
 	private PImage img;
-	private MapGenerator mapCreate;
-	private boolean showObstacleNode;
 	
-	private GraphGenerator GraphGenerator;
-	private GraphData G;
-	
-	private Dijkstra D;
-	private AStar A1;
-	private AStar A2;
-	private AStar A3;
-	
-	private List<Node> currentNodeList;
-	private List<Edge> currentEdgeList;
-	
-	private TimeControler diffTime;
 	
 /*
  * ====================
@@ -136,17 +110,11 @@ public class MainProgram extends PApplet{
  * ===========================
  */
 	
-	boolean isSeeking = false;
-	List<Integer> currentTargetQueue;
-	int targetIndex;
-	int closestIndex;
-	
 	public static GlobalSetting globalS;
 	
 	public void settings(){
 		
 		globalS = new GlobalSetting();
-		currentTargetQueue = new ArrayList<Integer>();
 		
 		windowWidth = 800;
 		windowHeight = 600;
@@ -167,8 +135,6 @@ public class MainProgram extends PApplet{
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
 
-		diffTime = new TimeControler();
-		
 		
 		backgroundColor = new ColorVectorRGB(255, 255, 255);
 		
@@ -179,8 +145,7 @@ public class MainProgram extends PApplet{
 		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
 
 		
-		maxVelocity = 5;
-		
+	
 		character = new CharacterDrop(
 			this,
 			20,
