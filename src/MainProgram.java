@@ -59,6 +59,16 @@ import java.util.List;
 import BasicBehavior.*;
 import BasicStructures.*;
 import DrawData.*;
+import GraphAlgorithm.AStar;
+import GraphAlgorithm.Dijkstra;
+import GraphAlgorithm.H1;
+import GraphAlgorithm.H2;
+import GraphAlgorithm.H3;
+import GraphData.Edge;
+import GraphData.GraphData;
+import GraphData.GraphGenerator;
+import GraphData.MapGenerator;
+import GraphData.Node;
 import MovementStructures.*;
 //import OldFile.*;
 import Variables.GlobalSetting;
@@ -81,19 +91,34 @@ public class MainProgram extends PApplet{
 	private KinematicOperations OperK;
 	private TimeControler decisionTimer;
 	private TimeControler breadTimer;
-
-	
 	
 	//Setting for environment
 	private ColorVectorRGB backgroundColor;
 	private CharacterDrop character;
 	
 	private Vector2 originalPoint;
-	private Vector2 initialTarget;
 	
 	//Seek function
+	private Seek Seek;
+	private AStar A1;
+	private ResultChange tempResult;
+	private Vector2 initialTarget;
+	boolean isSeeking = false;
+	List<Integer> currentTargetQueue;
+	int targetIndex;
+	int closestIndex;
+	
+	private List<Node> currentNodeList;
+	private List<Edge> currentEdgeList;
+	
+	
 
 	private PImage img;
+	
+	//for graph
+	private MapGenerator mapCreate;
+	private GraphGenerator graphGenerator; 
+	private GraphData G;
 	
 	
 /*
@@ -116,22 +141,26 @@ public class MainProgram extends PApplet{
 		
 		globalS = new GlobalSetting();
 		
-		windowWidth = 800;
-		windowHeight = 600;
+		currentTargetQueue = new ArrayList<Integer>();
 		
-		img = loadImage("gold-garrison.png");
+		windowWidth = GlobalSetting.screenWidth;
+		windowHeight = GlobalSetting.screenHeight;
+		
+		img = loadImage(".\\Material\\TestBackground.JPG");
 		//img = loadImage("Girl.png");
 		
 		size(windowWidth, windowHeight);
+		
 		// input this operations for each kinematics
-		
-		
+		OperK = new KinematicOperations(this, Sys);
+		// set system parameter: max V, max Acceleration
 		Sys = new SystemParameter(5, 5*0.1f);
 
-		OperK = new KinematicOperations(this, Sys);
 		originalPoint = new Vector2(0, 0);
+		//the decision rate
 		decisionTimer = new TimeControler();
 		decisionTimer.initialTimer();
+		// the time slat for record breadcrumbs
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
 
@@ -139,13 +168,13 @@ public class MainProgram extends PApplet{
 		backgroundColor = new ColorVectorRGB(255, 255, 255);
 		
 		
-		Vector2 currentShapePosition = new Vector2(windowWidth/2 , windowHeight/2);
+		Vector2 currentShapePosition = new Vector2(64 , windowHeight-64);
 		Vector2 initialVelocity = new Vector2(0, 0);
 		Vector2 initialAccel = new Vector2(0, 0);
 		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
 
 		
-	
+		//set character
 		character = new CharacterDrop(
 			this,
 			20,
@@ -162,7 +191,64 @@ public class MainProgram extends PApplet{
 			backgroundColor,
 			GlobalSetting.numberOfBread
 		);
-	
+		
+		//This part order cannot be changed
+		
+		mapCreate = new MapGenerator(5, 7, "test.txt");
+		//mapCreate.createRandomGraph("random.txt");
+
+		mapCreate.drawDot(GlobalSetting.tileNumber, windowWidth, windowHeight);
+		
+		mapCreate.readTile(this);
+		mapCreate.readObstacle(this);
+		//mapCreate.isObstacle = true;
+		
+		graphGenerator = new GraphGenerator(mapCreate, OperK, this);
+		graphGenerator.createEdge();
+		
+		G = new GraphData(graphGenerator.nodeList, graphGenerator.edgeList, this);		
+
+		currentNodeList = new ArrayList<Node>();
+		currentNodeList = G.nodeList;
+		
+		currentEdgeList = new ArrayList<Edge>();
+		currentEdgeList = G.edgeList;
+		
+		
+		//Seek for test 
+		Seek = new Seek(
+				5.0f,
+				100.0f,
+				0.1f,
+				currentShapePosition,
+				1,
+				currentShapePosition,
+				initialVelocity,
+				0,
+				0,
+				initialAccel,
+				0,
+				OperK,
+				Sys.getMaxV(),
+				Sys.getMaxV()*0.1f,
+				this
+				
+		);	
+		
+		initialTarget = currentShapePosition;
+		tempResult = new ResultChange(
+				character.getPosition().getX(),
+				character.getPosition().getY(),
+				character.getK().getOrientation(),
+				character.getK().getVelocity().getX(),
+				character.getK().getVelocity().getY(),
+				character.getK().getRotation(),
+				OperK,
+				character.getS().getLinearAccel().getX(),
+				character.getS().getLinearAccel().getY(),
+				character.getS().getAngularAccel()
+			);		
+		
 			System.out.println("");
 	}
 /*
@@ -181,10 +267,69 @@ public class MainProgram extends PApplet{
 		
 		character.updatePosition(character.getK().getPosition());
 		character.updateOrientation(character.getK().getOrientation());		
+
+		if(isSeeking == false){
+			if(mousePressed){
+				isSeeking = true;
+				initialTarget = new Vector2(mouseX, mouseY);
+				
+				//call path finding
+				targetIndex = findClose(currentNodeList, initialTarget);
+				closestIndex = findClose(currentNodeList, character.getK().getPosition());
+				
+				//System.out.println(targetIndex+ ", " + closestIndex);
+				H1 h1 = new H1(currentNodeList, currentEdgeList, targetIndex, closestIndex, OperK);
+				
+				A1 = new AStar(h1, currentNodeList, currentEdgeList, targetIndex, closestIndex);
+
+				while(A1.openList.size()>0){
+					A1.computeAStar(G.nodeList, G.edgeList);
+					//System.out.println("-----------");
+				}
+				if(A1.isFind == false){
+					System.out.println("Didn't find!!");
+				}
+				else{
+/*
+					System.out.print("\r\nAStar with H1 Path: ");
+					for(int i = 0 ;i < A1.result.size(); i++){
+						System.out.print(" " + A1.result.get(i)+" ");
+					}
+*/
+				}
+				currentTargetQueue.clear();
+				currentTargetQueue.addAll(A1.result);
+			}
+	
+		}
+		
+			//Gathering dots
 		
 		//make decisions in 0.02 sec frequency
 		if(decisionTimer.checkTimeSlot(20)){
 			//make one decision
+			if(isSeeking == true){
+				if(currentTargetQueue.size()>0){
+					//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
+					if(OperK.getDisBy2Points(currentNodeList.get(currentTargetQueue.get(0)).coordinate, character.getK().getPosition())>5){
+						//System.out.println("Current Target = " + currentTargetQueue.get(0));
+						initialTarget = currentNodeList.get(currentTargetQueue.get(0)).coordinate;
+					}
+					else{
+						currentTargetQueue.remove(0);
+					}
+
+					tempResult = Seek.computeSeek(initialTarget);
+			
+					character.setK(tempResult.getK());
+					character.setS(tempResult.getS());
+				}
+				else{
+					isSeeking = false;
+					
+				}
+				
+			}
 		}
 
 		//record
@@ -193,8 +338,11 @@ public class MainProgram extends PApplet{
 		}
 		//display		
 
-		//GraphGenerator.edgeDraw();
+		graphGenerator.edgeDraw();
+		//graphGenerator.displayObstacle();
+		graphGenerator.nodeDisplay(this);
 
+		//mapCreate.nodeDisplay(this);
 		character.display();
 
 	}
@@ -208,4 +356,30 @@ public class MainProgram extends PApplet{
 		System.out.println(" This is new program.");
 		PApplet.main(new String[] { "--present", "MainProgram" });
 	}
+	public void mouseReleased(){
+
+		stroke(0);
+		ellipse( mouseX, mouseY, 5, 5 );
+		text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );	
+		mapCreate.markObstacles(new Vector2(mouseX, mouseY));
+	}
+	public int findClose(List<Node> NodeList, Vector2 Point){
+		int resultIndex = 0;
+		float minDistance = 0;
+		float tempDistance = 0;
+		
+		for(int i = 0; i< NodeList.size();i++){
+			tempDistance = OperK.getDisBy2Points(NodeList.get(i).coordinate, Point);
+
+			if(i == 0){
+				minDistance = tempDistance;
+				resultIndex = i;
+			}
+			if(tempDistance < minDistance){
+				minDistance = tempDistance;
+				resultIndex = i;
+			}
+		}
+		return resultIndex;
+	}	
 }

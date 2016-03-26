@@ -1,6 +1,8 @@
 package Variables;
 
 public class GlobalSetting {
+	public static int screenWidth;
+	public static int screenHeight;
 	public static int testStart;
 	public static int testGoal;
 	public static int HeuristicMode;
@@ -12,8 +14,14 @@ public class GlobalSetting {
 	public static int level3Weight;
 	
 	public static int numberOfBread;
+	public static int tileNumber;
+	public static int nodeSize;
+	public static int obstacleMargin;
 	
 	public GlobalSetting(){
+		screenWidth = 800;
+		screenHeight = 600;
+		
 		testStart = 6;
 		testGoal = 10;
 		
@@ -29,5 +37,8 @@ public class GlobalSetting {
 		
 		numberOfBread = 100;
 		
+		tileNumber = 50;
+		nodeSize = 5;
+		obstacleMargin = 3;
 	}
 }
