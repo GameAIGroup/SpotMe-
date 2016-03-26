@@ -278,7 +278,7 @@ public class MainProgram extends PApplet{
 				closestIndex = findClose(currentNodeList, character.getK().getPosition());
 				
 				//System.out.println(targetIndex+ ", " + closestIndex);
-				H1 h1 = new H1(currentNodeList, currentEdgeList, targetIndex, closestIndex, OperK);
+				H2 h1 = new H2(currentNodeList, currentEdgeList, targetIndex, closestIndex, OperK);
 				
 				A1 = new AStar(h1, currentNodeList, currentEdgeList, targetIndex, closestIndex);
 
@@ -340,7 +340,7 @@ public class MainProgram extends PApplet{
 
 		graphGenerator.edgeDraw();
 		//graphGenerator.displayObstacle();
-		graphGenerator.nodeDisplay(this);
+		//graphGenerator.nodeDisplay(this);
 
 		//mapCreate.nodeDisplay(this);
 		character.display();
