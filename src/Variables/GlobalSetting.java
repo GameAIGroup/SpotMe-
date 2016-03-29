@@ -10,6 +10,7 @@ public class GlobalSetting {
 	public static int tileNumber;
 	public static int nodeSize;
 	public static int obstacleMargin;
+	public static double maxVisionAngle;
 	
 	public static int numberOfbots;
 	
@@ -60,5 +61,10 @@ public class GlobalSetting {
 
 		characterLives = 3;		
 		
+		tileNumber = 100;
+		nodeSize = 5;
+		obstacleMargin = 3;
+		maxVisionAngle = 0.3;
+
 	}
 }

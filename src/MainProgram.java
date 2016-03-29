@@ -76,6 +76,7 @@ import Variables.GameDisplay;
 import Variables.GlobalSetting;
 import Variables.PublicGraph;
 import processing.core.*;
+import MovementStructures.KinematicOperations.*;
 
 /*
  * =============
@@ -98,6 +99,7 @@ public class MainProgram extends PApplet{
 	//Setting for environment
 	private ColorVectorRGB backgroundColor;
 	private CharacterDrop character;
+	private CharacterDrop bot;
 	
 	private CharacterHuman[] Bot;
 	//private CharacterHuman test;
@@ -122,7 +124,14 @@ public class MainProgram extends PApplet{
 	
 
 	private PImage img;
-	
+
+        //for graph
+	private MapGenerator mapCreate;
+	private GraphGenerator graphGenerator; 
+	private GraphData G;
+	private KinematicOperations kinematicOp;
+
+	public PublicGraph publicG;
 
 	
 	private Pursue pursue;
@@ -132,8 +141,6 @@ public class MainProgram extends PApplet{
 	private int downMove;
 	private int leftMove;
 	private int rightMove;
-	
-	
 	
 /*
  * ====================
@@ -191,11 +198,62 @@ public class MainProgram extends PApplet{
 		
 		Vector2 currentShapePosition = new Vector2(64 , windowHeight-64);
 		currentShapePosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, currentShapePosition)).coordinate;
+		Vector2 currentBotPosition = new Vector2(264 , windowHeight-64);
+
 		Vector2 initialVelocity = new Vector2(0, 0);
 		Vector2 initialAccel = new Vector2(0, 0);
 		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
+		
+		//set character
+		character = new CharacterDrop(
+			this,
+			20,
+			20,
+			originalPoint,
+			currentShapePosition,
+			0,
+			initialVelocity,
+			0,
+			OperK,				
+			initialAccel,
+			0,
+			tempColor,
+			backgroundColor,
+			GlobalSetting.numberOfBread
+		);
 
-	
+		bot = new CharacterDrop(
+				this,
+				20,
+				20,
+				originalPoint,
+				currentBotPosition,
+				0,
+				initialVelocity,
+				0,
+				OperK,				
+				initialAccel,
+				0,
+				tempColor,
+				backgroundColor,
+				GlobalSetting.numberOfBread
+			);
+		
+		//This part order cannot be changed
+		
+		mapCreate = new MapGenerator(5, 7, "test.txt");
+		//mapCreate.createRandomGraph("random.txt");
+
+		mapCreate.drawDot(GlobalSetting.tileNumber, windowWidth, windowHeight);
+		
+		mapCreate.readTile(this);
+		mapCreate.readObstacle(this);
+		//mapCreate.isObstacle = true;
+		
+		graphGenerator = new GraphGenerator(mapCreate, OperK, this);
+		graphGenerator.createEdge();
+		
+		G = new GraphData(graphGenerator.nodeList, graphGenerator.edgeList, this);	
 
 		currentNodeList = new ArrayList<Node>();
 		currentNodeList = PublicGraph.G.nodeList;
@@ -294,6 +352,34 @@ public class MainProgram extends PApplet{
 		
 		System.out.println("");
 	}
+	
+	public List<Node> getVisionRangeNodes(CharacterDrop bot)
+	{
+		List<Node> filteredNodes = new ArrayList<Node>();
+		for (Node node: G.nodeList)
+		{
+				Vector2 vector = new Vector2(node.coordinate.x, node.coordinate.y);
+				if(!graphGenerator.checkObstacle(vector))
+				{
+					Vector2 vector2 = new Vector2((vector.x - bot.getPosition().x), (vector.y - bot.getPosition().y));
+					float currentOr = bot.getOrientation();
+					float resultantOr = OperK.getOrientationByV(bot.getOrientation(), vector2);
+					if ((Math.min(abs(currentOr - resultantOr), abs((float) ((6.28 - currentOr) - resultantOr))) < (GlobalSetting.maxVisionAngle/2)))
+					{
+						filteredNodes.add(node);
+					}
+				}
+		}
+		return filteredNodes;
+	}
+	
+	public void HighlightNodes(List<Node> nodes)
+	{
+		for (Node node: nodes)
+		{
+			ellipse(node.coordinate.x, node.coordinate.y, 10, 10);
+		}
+	}
 /*
  * 	(non-Javadoc)
  * @see processing.core.PApplet#draw()
@@ -317,6 +403,11 @@ public class MainProgram extends PApplet{
 			Bot[i].updatePosition(Bot[i].getK().getPosition());
 			Bot[i].updateOrientation(Bot[i].getK().getOrientation());		
 		}
+		
+		bot.updatePosition(bot.getK().getPosition());
+		bot.updateOrientation(bot.getK().getOrientation());
+		
+		bot.display();
 
 		//================Decision Tree=================================================================================
 		
@@ -452,7 +543,9 @@ public class MainProgram extends PApplet{
 		for(int i = 0; i < NumberOfBots; i++){
 			Bot[i].display();
 		}
-
+		
+		List<Node> visionRangeNodes = getVisionRangeNodes(bot);
+		HighlightNodes(visionRangeNodes);
 	}
 /*
  * ==========================
