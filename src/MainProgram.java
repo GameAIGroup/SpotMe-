@@ -253,7 +253,7 @@ public class MainProgram extends PApplet{
 				character.getS().getLinearAccel().getX(),
 				character.getS().getLinearAccel().getY(),
 				character.getS().getAngularAccel()
-			);	
+		);	
 		
 		NumberOfBots = GlobalSetting.numberOfbots;
 		Bot = new CharacterDrop[NumberOfBots];

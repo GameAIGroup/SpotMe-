@@ -6,8 +6,10 @@ import java.util.List;
 
 import BasicStructures.*;
 import GraphAlgorithm.AStar;
+import GraphAlgorithm.H2;
 import BasicBehavior.Seek;
 import MovementStructures.*;
+import Variables.CommonFunction;
 import processing.core.PApplet;
 
 public class CharacterDrop {
@@ -32,6 +34,10 @@ public class CharacterDrop {
 	private SteeringData paraS;
 	private AStar A;
 	private Seek Seek;
+	private boolean isSeeking;
+	private int count = 0;
+	public List<Integer> targetQueue;
+	private ResultChange tempResult;
 	
 	
 	public CharacterDrop(
@@ -87,6 +93,23 @@ public class CharacterDrop {
 			shape[i] = new DropShape(P, CircleSize, TriangleSize, OriginalPoint, CurrentPosition, CurrentOrientation, Color);
 			//System.out.println(CurrentPosition.getX()+ ", " +CurrentPosition.getY() );
 		}
+		isSeeking = false;
+		count = 0;
+		
+		targetQueue = new ArrayList<Integer>();
+		
+		tempResult = new ResultChange(
+			getPosition().getX(),
+			getPosition().getY(),
+			getK().getOrientation(),
+			getK().getVelocity().getX(),
+			getK().getVelocity().getY(),
+			getK().getRotation(),
+			operK,
+			getS().getLinearAccel().getX(),
+			getS().getLinearAccel().getY(),
+			getS().getAngularAccel()
+		);			
 
 		
 	}
@@ -229,7 +252,8 @@ public class CharacterDrop {
 		}
 
 	}
-	public void recordBread(){
+	public void Wander(){
+
 		
 	}
 	
