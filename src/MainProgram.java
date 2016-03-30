@@ -128,6 +128,13 @@ public class MainProgram extends PApplet{
 	private Pursue pursue;
 	public CommonFunction CF;
 	
+	//key control
+	private int upMove;
+	private int downMove;
+	private int leftMove;
+	private int rightMove;
+	
+	
 	
 /*
  * ====================
@@ -178,6 +185,7 @@ public class MainProgram extends PApplet{
 		breadTimer.initialTimer();
 		
 		Vector2 currentShapePosition = new Vector2(64 , windowHeight-64);
+		currentShapePosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, currentShapePosition)).coordinate;
 		Vector2 initialVelocity = new Vector2(0, 0);
 		Vector2 initialAccel = new Vector2(0, 0);
 		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
@@ -259,6 +267,7 @@ public class MainProgram extends PApplet{
 					0,
 					OperK,				
 					initialAccel,
+		
 					0,
 					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
 					backgroundColor,
@@ -270,6 +279,13 @@ public class MainProgram extends PApplet{
 		
 		
 		currentTargetQueue = new ArrayList<Integer>();
+		
+		//key control
+		upMove = 0;
+		downMove = 0;
+		leftMove = 0;
+		rightMove = 0;
+		
 		
 		System.out.println("");
 	}
@@ -385,7 +401,6 @@ public class MainProgram extends PApplet{
 		
 		//make decisions in 0.02 sec frequency
 		if(decisionTimer.checkTimeSlot(20)){
-			character.Wander();
 			for(int i = 0 ; i < NumberOfBots; i++){
 				Bot[i].Wander();
 			}
@@ -429,5 +444,47 @@ public class MainProgram extends PApplet{
 		text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );	
 		PublicGraph.mapCreate.markObstacles(new Vector2(mouseX, mouseY));
 	}
+	public void keyPressed() {
+		if (keyCode == UP) {
+			upMove = upMove-GlobalSetting.keyMoveDistance;
+			//System.out.println("UP: "+upMove);
+			character.Move(upMove, downMove, leftMove, rightMove);
+			upMove = 0;
+			downMove = 0;
+			leftMove = 0;
+			rightMove = 0;
+
+		} 
+	    else if (keyCode == DOWN) {
+			downMove = downMove+GlobalSetting.keyMoveDistance;
+			//System.out.println("Down: "+downMove);
+			character.Move(upMove, downMove, leftMove, rightMove);
+			upMove = 0;
+			downMove = 0;
+			leftMove = 0;
+			rightMove = 0;
+
+	    }
+	    else if(keyCode == LEFT){
+			leftMove = leftMove-GlobalSetting.keyMoveDistance;
+			//System.out.println("Left: "+leftMove);
+			character.Move(upMove, downMove, leftMove, rightMove);
+			upMove = 0;
+			downMove = 0;
+			leftMove = 0;
+			rightMove = 0;
+
+	    }
+	    else if(keyCode == RIGHT){
+			rightMove = rightMove+GlobalSetting.keyMoveDistance;
+			//System.out.println("Right: "+rightMove);
+			character.Move(upMove, downMove, leftMove, rightMove);
+			upMove = 0;
+			downMove = 0;
+			leftMove = 0;
+			rightMove = 0;
+
+	    }
+	}	
 
 }

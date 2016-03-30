@@ -15,6 +15,8 @@ public class GlobalSetting {
 	
 	public static int wanderTimeBound;
 	
+	public static int keyMoveDistance;
+	
 	
 	//prediction------------------------------------------------------------------------------------------
 	public static Predictions predictions;
@@ -40,5 +42,7 @@ public class GlobalSetting {
 		//prediction------------------------------------------------------------------------------------------
 		predictions = new Predictions(numberOfbots);
 		//End of prediction------------------------------------------------------------------------------------
+		
+		keyMoveDistance = 10;
 	}
 }
