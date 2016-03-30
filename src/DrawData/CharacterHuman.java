@@ -4,26 +4,28 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import BasicStructures.*;
+import BasicBehavior.Seek;
+import BasicStructures.ColorVectorRGB;
+import BasicStructures.Vector2;
 import GraphAlgorithm.AStar;
 import GraphAlgorithm.H2;
-import GraphData.GraphGenerator;
-import GraphData.Node;
-import BasicBehavior.Seek;
-import MovementStructures.*;
+import MovementStructures.KinematicData;
+import MovementStructures.KinematicOperations;
+import MovementStructures.ResultChange;
+import MovementStructures.SteeringData;
+import MovementStructures.SystemParameter;
 import Variables.CommonFunction;
 import Variables.GlobalSetting;
 import Variables.PublicGraph;
 import processing.core.PApplet;
-import Variables.GlobalSetting;
 
-public class CharacterDrop {
+public class CharacterHuman  {
 	//shape
 	//private DropShape nowShape;
 	private ColorVectorRGB shapeColor;
 	private ColorVectorRGB backgroundColor;
 	
-	private DropShape[] shape;
+	private HumanShape[] shape;
 	//breadcrumb
 	private boolean isBreadcrumb;
 	private List<BreadcrumbInfo> breadQueue;
@@ -60,7 +62,7 @@ public class CharacterDrop {
 	private boolean isSeek;
 	//End of Request
 
-	public CharacterDrop(
+	public CharacterHuman(
 			PApplet P,
 			float CircleSize,
 			float TriangleSize,			
@@ -109,12 +111,12 @@ public class CharacterDrop {
 
 		isBreadcrumb = true;
 		
-		shape = new DropShape[breadNumber];
+		shape = new HumanShape[breadNumber];
 		//System.out.println(CurrentPosition.getX()+ ", " +CurrentPosition.getY() );
 		
 		//nowShape = new DropShape(P, CircleSize, TriangleSize, OriginalPoint, CurrentPosition, CurrentOrientation, Color);
 		for(int i = 0; i< breadNumber; i++){
-			shape[i] = new DropShape(P, CircleSize, TriangleSize, OriginalPoint, CurrentPosition, CurrentOrientation, Color);
+			shape[i] = new HumanShape(P, CircleSize, TriangleSize, OriginalPoint, CurrentPosition, CurrentOrientation, Color);
 			//System.out.println(CurrentPosition.getX()+ ", " +CurrentPosition.getY() );
 		}
 		isSeeking = false;
@@ -274,7 +276,7 @@ public class CharacterDrop {
 			
 			for(int i = 0; i < breadQueue.size(); i++){
 				updateShapePosition(breadQueue.get(i).getPosition(), i);
-				updateOrientation(breadQueue.get(i).getOrientation(), i);
+				//updateOrientation(breadQueue.get(i).getOrientation(), i);
 				//System.out.println(breadQueue.get(i).getOrientation());
 				//System.out.println(breadQueue.get(i).getPosition().getX() +", "+ breadQueue.get(i).getPosition().getY());
 				updateShapeColor(

@@ -106,6 +106,18 @@ public class KinematicOperations {
 		}
 		else{
 			resultOrientation = Math.atan2((double)(-1)* TargetVelocity.getX(), (double)(1)*TargetVelocity.getY())+ (double)parent.PI;
+/*
+			if(Math.abs(resultOrientation) <= parent.PI){
+			}
+			else{
+				if(resultOrientation > parent.PI){
+					resultOrientation = resultOrientation - 2* parent.PI;
+				}
+				else{
+					resultOrientation = resultOrientation + 2* parent.PI;
+				}
+			}
+*/
 		}
 		return (float)resultOrientation;		
 	}

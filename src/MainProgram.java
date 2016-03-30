@@ -73,6 +73,7 @@ import MovementStructures.*;
 import Variables.CommonFunction;
 //import OldFile.*;
 import Variables.GlobalSetting;
+import Variables.PublicGraph;
 import processing.core.*;
 
 /*
@@ -88,7 +89,7 @@ public class MainProgram extends PApplet{
  */
 	private int windowWidth;
 	private int windowHeight;
-	private SystemParameter Sys;
+
 	private KinematicOperations OperK;
 	private TimeControler decisionTimer;
 	private TimeControler breadTimer;
@@ -97,15 +98,16 @@ public class MainProgram extends PApplet{
 	private ColorVectorRGB backgroundColor;
 	private CharacterDrop character;
 	
-	private CharacterDrop[] Bot;
+	private CharacterHuman[] Bot;
+	//private CharacterHuman test;
 	private int NumberOfBots;
 	private List<Integer>[] botsTargetQueue;
 	
 	private Vector2 originalPoint;
 	
 	//Seek function
-	private Seek Seek;
-	private AStar A1;
+	//private Seek Seek;
+	//private AStar A1;
 	private ResultChange tempResult;
 	private Vector2 initialTarget;
 	boolean isSeeking = false;
@@ -120,10 +122,8 @@ public class MainProgram extends PApplet{
 
 	private PImage img;
 	
-	//for graph
-	private MapGenerator mapCreate;
-	private GraphGenerator graphGenerator; 
-	private GraphData G;
+	public PublicGraph publicG;
+
 	
 	private Pursue pursue;
 	public CommonFunction CF;
@@ -143,10 +143,11 @@ public class MainProgram extends PApplet{
  * ===========================
  */
 	
+	public static SystemParameter Sys;
 	public static GlobalSetting globalS;
 	
 	public void settings(){
-		
+
 		globalS = new GlobalSetting();
 		// set system parameter: max V, max Acceleration
 		Sys = new SystemParameter(5, 5*0.1f, PI/2.0f);
@@ -154,19 +155,21 @@ public class MainProgram extends PApplet{
 		OperK = new KinematicOperations(this, Sys);
 
 		CF = new CommonFunction(OperK);
+		publicG = new PublicGraph(this, OperK);
 
 		
 		windowWidth = GlobalSetting.screenWidth;
 		windowHeight = GlobalSetting.screenHeight;
 
 		img = loadImage("TestBackground.JPG");
+		backgroundColor = new ColorVectorRGB(255, 255, 255);
 
 		size(windowWidth, windowHeight);
-		backgroundColor = new ColorVectorRGB(255, 255, 255);
+		
 
 		
 		originalPoint = new Vector2(0, 0);
-		
+
 		//the decision rate
 		decisionTimer = new TimeControler();
 		decisionTimer.initialTimer();
@@ -179,67 +182,36 @@ public class MainProgram extends PApplet{
 		Vector2 initialAccel = new Vector2(0, 0);
 		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
 
-		//This part order cannot be changed
-		
-		mapCreate = new MapGenerator(5, 7, "test.txt");
-		//mapCreate.createRandomGraph("random.txt");
-
-		mapCreate.drawDot(GlobalSetting.tileNumber, windowWidth, windowHeight);
-		
-		mapCreate.readTile(this);
-		mapCreate.readObstacle(this);
-		//mapCreate.isObstacle = true;
-		
-		graphGenerator = new GraphGenerator(mapCreate, OperK, this);
-		graphGenerator.createEdge();
-		
-		G = new GraphData(graphGenerator.nodeList, graphGenerator.edgeList, this);		
+	
 
 		currentNodeList = new ArrayList<Node>();
-		currentNodeList = G.nodeList;
+		currentNodeList = PublicGraph.G.nodeList;
 		
 		currentEdgeList = new ArrayList<Edge>();
-		currentEdgeList = G.edgeList;
+		currentEdgeList = PublicGraph.G.edgeList;
 
 	
 		//Seek for test 
-		Seek = new Seek(
-				5.0f,
-				100.0f,
-				0.1f,
-				currentShapePosition,
-				1,
-				currentShapePosition,
-				initialVelocity,
-				0,
-				0,
-				initialAccel,
-				0,
-				OperK,
-				Sys.getMaxV(),
-				Sys.getMaxV()*0.1f,
-				this
-				
-		);	
+	
 		
 		//set character
 		character = new CharacterDrop(
-			this,
-			20,
-			20,
-			originalPoint,
-			currentShapePosition,
-			0,
-			initialVelocity,
-			0,
-			OperK,				
-			initialAccel,
-			0,
-			tempColor,
-			backgroundColor,
-			GlobalSetting.numberOfBread,
-			0, 
-			Seek
+				this,
+				20,
+				20,
+				originalPoint,
+				currentShapePosition,
+				0,
+				initialVelocity,
+				0,
+				OperK,				
+				initialAccel,
+				0,
+				tempColor,
+				backgroundColor,
+				GlobalSetting.numberOfBread,
+				Sys,
+				0
 		);
 		
 		initialTarget = currentShapePosition;
@@ -257,28 +229,26 @@ public class MainProgram extends PApplet{
 		);	
 		
 		NumberOfBots = GlobalSetting.numberOfbots;
-		Bot = new CharacterDrop[NumberOfBots];
+		Bot = new CharacterHuman[NumberOfBots];
 		//botsTargetQueue = new ArrayList<Integer>[NumberOfBots]();
-		
-		
+
 		//prediction------------------------------------------------------------------------------------------		
 		//test Prediction is OK
 		Vector2 a = new Vector2(20, 10);
 		character.updateMyPrediction(a);
-		println(character.getMyPrediction().getX());
+		System.out.println(character.getMyPrediction().getX());
 		//End of prediction------------------------------------------------------------------------------------
 
-		
-		
+				
 		
 		for(int i = 0; i<NumberOfBots ;i ++ ){
 			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
 			
-			while(graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
+			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
 				botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
 			}
 			
-			Bot[i] = new CharacterDrop(
+			Bot[i] = new CharacterHuman(
 					this,
 					20,
 					20,
@@ -293,8 +263,8 @@ public class MainProgram extends PApplet{
 					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
 					backgroundColor,
 					GlobalSetting.numberOfBread,
-					i,
-					Seek
+					Sys,
+					0
 			);
 		}		
 		
@@ -326,24 +296,25 @@ public class MainProgram extends PApplet{
 			Bot[i].updatePosition(Bot[i].getK().getPosition());
 			Bot[i].updateOrientation(Bot[i].getK().getOrientation());		
 		}
-		
-		
-		
+
 		//================Decision Tree=================================================================================
 		
-		boolean checkPlayer;
-		boolean inShootingRange;
-		boolean isCloset;
-		boolean haveWeapon;
-		boolean inSafeSpot;
-		boolean receiveRequest; //when to switch back to no receive?
+		boolean checkPlayer = false;
+		boolean inShootingRange = false;
+		boolean isCloset = false;
+		boolean haveWeapon  = false;
+		boolean inSafeSpot = false;
+		boolean receiveRequest  = false; //when to switch back to no receive?
 		int[] otherbots;//
-	
+		//--------------
+		otherbots = new int[NumberOfBots];
+		
+		
 		if(Bot[1].checkSeekMode() == true){
 			if ( checkPlayer == true){
 				//1. seek mode- purse
 				Bot[1].isSeekMode();
-				Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+				//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
 				//ask for other wander bots to support
 				for (int i = 0; i < otherbots.length ; i++){
 					if ( Bot[i].checkSeekMode() == false){
@@ -367,13 +338,13 @@ public class MainProgram extends PApplet{
 					}
 					else{//not the closest
 						Bot[1].isSeekMode();
-						Seek.updateTargetPosition(Bot[1].getMyPrediction());
+						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
 					}
 						
 				}
 				else{//not in shooting range
 					Bot[1].isSeekMode();
-					Seek.updateTargetPosition(Bot[1].getMyPrediction());
+					//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
 				}
 			}
 			else{//no player around
@@ -383,7 +354,7 @@ public class MainProgram extends PApplet{
 				}
 				else{//go to prediction from other bots
 					Bot[1].isSeekMode();
-					Seek.updateTargetPosition(Bot[1].getMyPrediction());
+					//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
 				}
 			}
 		}
@@ -391,14 +362,14 @@ public class MainProgram extends PApplet{
 			//wandering Mode
 			if ( checkPlayer == true){
 				Bot[1].isSeekMode();
-				Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-				Seek.updateTargetPosition(Bot[1].getMyPrediction());			
+				//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+				//---Seek.updateTargetPosition(Bot[1].getMyPrediction());			
 			}
 			else{//no player around
 				if ( character.checkRequest() == true ){
 					Bot[1].isSeekMode();
-					Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-					Seek.updateTargetPosition(Bot[1].getMyPrediction());	
+					//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+					//---Seek.updateTargetPosition(Bot[1].getMyPrediction());	
 				}
 				else{
 					//keep wandering
@@ -410,73 +381,13 @@ public class MainProgram extends PApplet{
 		//================End of Decision Tree=================================================================================
 		
 
-		if(isSeeking == false){
-			//if(mousePressed){
-				isSeeking = true;
-				//call path finding
-
-				initialTarget = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
-				targetIndex = CommonFunction.findClose(currentNodeList, initialTarget);
-				
-				while(graphGenerator.ObsOverlapList.get(targetIndex)== 1){
-					initialTarget = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
-					targetIndex = CommonFunction.findClose(currentNodeList, initialTarget);
-				}
-				
-				closestIndex = CommonFunction.findClose(currentNodeList, character.getK().getPosition());
-				
-				//System.out.println(targetIndex+ ", " + closestIndex);
-				H2 h1 = new H2(currentNodeList, currentEdgeList, targetIndex, closestIndex, OperK);
-				
-				A1 = new AStar(h1, currentNodeList, currentEdgeList, targetIndex, closestIndex);
-
-				while(A1.openList.size()>0){
-					A1.computeAStar(G.nodeList, G.edgeList);
-					//System.out.println("-----------");
-				}
-				if(A1.isFind == false){
-					System.out.println("Didn't find!!");
-				}
-				else{
-				}
-				currentTargetQueue.clear();
-				currentTargetQueue.addAll(A1.result);
-			//}
-	
-		}
-		
-
-
 		//Gathering dots
 		
 		//make decisions in 0.02 sec frequency
 		if(decisionTimer.checkTimeSlot(20)){
-			count = (count+1)%50;
-			//make one decision
-			if(isSeeking == true){
-				if(currentTargetQueue.size()>0){
-					//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
-					if(OperK.getDisBy2Points(currentNodeList.get(currentTargetQueue.get(0)).coordinate, character.getK().getPosition())>5){
-						//System.out.println("Current Target = " + currentTargetQueue.get(0));
-						initialTarget = currentNodeList.get(currentTargetQueue.get(0)).coordinate;
-					}
-					else{
-						currentTargetQueue.remove(0);
-					}
-
-					tempResult = Seek.computeSeek(initialTarget);
-			
-					character.setK(tempResult.getK());
-					character.setS(tempResult.getS());
-				}
-				else{
-					isSeeking = false;
-					
-				}
-				if(count == 0){
-					isSeeking = false;
-				}
-				
+			character.Wander();
+			for(int i = 0 ; i < NumberOfBots; i++){
+				Bot[i].Wander();
 			}
 		}
 
@@ -490,8 +401,8 @@ public class MainProgram extends PApplet{
 		}
 		//display		
 
-		graphGenerator.edgeDraw();
-		graphGenerator.displayObstacle();
+		PublicGraph.graphGenerator.edgeDraw();
+		PublicGraph.graphGenerator.displayObstacle();
 		//graphGenerator.nodeDisplay(this);
 
 		//mapCreate.nodeDisplay(this);
@@ -516,7 +427,7 @@ public class MainProgram extends PApplet{
 		stroke(0);
 		ellipse( mouseX, mouseY, 5, 5 );
 		text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );	
-		mapCreate.markObstacles(new Vector2(mouseX, mouseY));
+		PublicGraph.mapCreate.markObstacles(new Vector2(mouseX, mouseY));
 	}
 
 }

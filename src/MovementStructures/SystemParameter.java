@@ -1,18 +1,19 @@
 package MovementStructures;
 
 public class SystemParameter {
-	private float maxVelocity;
-	private float maxAcceleration;
-	private float maxRotation;
+	public float maxVelocity;
+	public float maxAcceleration;
+	public float maxRotation;
 	
 	public SystemParameter(
 		float MaxVelocity,
 		float MaxAcceleration,
 		float MaxRotation
 	){
-		this.maxVelocity = MaxVelocity;
-		this.maxAcceleration = MaxAcceleration;
-		this.maxRotation = MaxRotation;
+		maxVelocity = MaxVelocity;
+		//System.out.println("--"+maxVelocity);
+		maxAcceleration = MaxAcceleration;
+		maxRotation = MaxRotation;
 	}
 	
 	
