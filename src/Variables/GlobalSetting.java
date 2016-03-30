@@ -20,7 +20,7 @@ public class GlobalSetting {
 		
 		HeuristicMode = 1;
 
-		numberOfBread = 30;
+		numberOfBread = 10;
 		
 		tileNumber = 50;
 		nodeSize = 5;

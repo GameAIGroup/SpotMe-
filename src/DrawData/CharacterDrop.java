@@ -5,6 +5,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import BasicStructures.*;
+import GraphAlgorithm.AStar;
+import BasicBehavior.Seek;
 import MovementStructures.*;
 import processing.core.PApplet;
 
@@ -28,6 +30,8 @@ public class CharacterDrop {
 	
 	//SteeringData
 	private SteeringData paraS;
+	private AStar A;
+	private Seek Seek;
 	
 	
 	public CharacterDrop(
@@ -44,7 +48,8 @@ public class CharacterDrop {
 			float AngularAccel,
 			ColorVectorRGB Color,
 			ColorVectorRGB BackColor,
-			int NumberOfBread
+			int NumberOfBread,
+			Seek Seek
 	){
 		breadQueue = new  ArrayList<BreadcrumbInfo>();
 		//testbreadQueue = new  ArrayList<String>();
@@ -52,6 +57,9 @@ public class CharacterDrop {
 		this.breadNumber = NumberOfBread;
 		this.shapeColor = Color;
 		this.backgroundColor = BackColor;
+		
+		this.A = A;
+		this.Seek = Seek;
 		
 		this.operK = K;
 		
@@ -220,7 +228,10 @@ public class CharacterDrop {
 */			
 		}
 
-	}	
+	}
+	public void recordBread(){
+		
+	}
 	
 
 }

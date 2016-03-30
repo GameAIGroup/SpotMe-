@@ -70,6 +70,7 @@ import GraphData.GraphGenerator;
 import GraphData.MapGenerator;
 import GraphData.Node;
 import MovementStructures.*;
+import Variables.CommonFunction;
 //import OldFile.*;
 import Variables.GlobalSetting;
 import processing.core.*;
@@ -125,6 +126,7 @@ public class MainProgram extends PApplet{
 	private GraphData G;
 	
 	private Pursue pursue;
+	public CommonFunction CF;
 	
 	
 /*
@@ -146,61 +148,37 @@ public class MainProgram extends PApplet{
 	public void settings(){
 		
 		globalS = new GlobalSetting();
-		
-		currentTargetQueue = new ArrayList<Integer>();
+		// set system parameter: max V, max Acceleration
+		Sys = new SystemParameter(5, 5*0.1f, PI/2.0f);
+		// input this operations for each kinematics
+		OperK = new KinematicOperations(this, Sys);
+
+		CF = new CommonFunction(OperK);
+
 		
 		windowWidth = GlobalSetting.screenWidth;
 		windowHeight = GlobalSetting.screenHeight;
-		
-		img = loadImage("TestBackground.JPG");
-		//img = loadImage("Girl.png");
-		
-		size(windowWidth, windowHeight);
-		
-		// input this operations for each kinematics
-		OperK = new KinematicOperations(this, Sys);
-		// set system parameter: max V, max Acceleration
-		Sys = new SystemParameter(5, 5*0.1f, PI/2.0f);
 
+		img = loadImage("TestBackground.JPG");
+
+		size(windowWidth, windowHeight);
+		backgroundColor = new ColorVectorRGB(255, 255, 255);
+
+		
 		originalPoint = new Vector2(0, 0);
+		
 		//the decision rate
 		decisionTimer = new TimeControler();
 		decisionTimer.initialTimer();
 		// the time slat for record breadcrumbs
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
-
-		
-		backgroundColor = new ColorVectorRGB(255, 255, 255);
-		
 		
 		Vector2 currentShapePosition = new Vector2(64 , windowHeight-64);
 		Vector2 initialVelocity = new Vector2(0, 0);
 		Vector2 initialAccel = new Vector2(0, 0);
 		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
 
-		
-		//set character
-		character = new CharacterDrop(
-			this,
-			20,
-			20,
-			originalPoint,
-			currentShapePosition,
-			0,
-			initialVelocity,
-			0,
-			OperK,				
-			initialAccel,
-			0,
-			tempColor,
-			backgroundColor,
-			GlobalSetting.numberOfBread
-		);
-		
-
-		
-		
 		//This part order cannot be changed
 		
 		mapCreate = new MapGenerator(5, 7, "test.txt");
@@ -222,8 +200,8 @@ public class MainProgram extends PApplet{
 		
 		currentEdgeList = new ArrayList<Edge>();
 		currentEdgeList = G.edgeList;
-		
-		
+
+	
 		//Seek for test 
 		Seek = new Seek(
 				5.0f,
@@ -244,14 +222,24 @@ public class MainProgram extends PApplet{
 				
 		);	
 		
-		pursue = new Pursue(OperK, Sys);
-		Vector2 testResult = new Vector2(0, 0);
-		Vector2 temp1 = new Vector2(5, 0);
-		Vector2 temp2 = new Vector2(0, 0);
-		Vector2 temp3 = new Vector2(0, 2);
-		
-		//testResult = pursue.makePrediction(temp2, temp3, temp1);
-		//System.out.println("predicition = " +testResult.x +", " + testResult.y);
+		//set character
+		character = new CharacterDrop(
+			this,
+			20,
+			20,
+			originalPoint,
+			currentShapePosition,
+			0,
+			initialVelocity,
+			0,
+			OperK,				
+			initialAccel,
+			0,
+			tempColor,
+			backgroundColor,
+			GlobalSetting.numberOfBread,
+			Seek
+		);
 		
 		initialTarget = currentShapePosition;
 		tempResult = new ResultChange(
@@ -274,7 +262,7 @@ public class MainProgram extends PApplet{
 		for(int i = 0; i<NumberOfBots ;i ++ ){
 			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
 			
-			while(graphGenerator.ObsOverlapList.get(findClose(currentNodeList, botPosition))==1){
+			while(graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
 				botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
 			}
 			
@@ -283,7 +271,7 @@ public class MainProgram extends PApplet{
 					20,
 					20,
 					originalPoint,
-					currentShapePosition,
+					botPosition,
 					0,
 					initialVelocity,
 					0,
@@ -292,11 +280,15 @@ public class MainProgram extends PApplet{
 					0,
 					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
 					backgroundColor,
-					GlobalSetting.numberOfBread
+					GlobalSetting.numberOfBread,
+					Seek
 			);
 		}		
 		
-			System.out.println("");
+		
+		currentTargetQueue = new ArrayList<Integer>();
+		
+		System.out.println("");
 	}
 /*
  * 	(non-Javadoc)
@@ -331,14 +323,14 @@ public class MainProgram extends PApplet{
 				//call path finding
 
 				initialTarget = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
-				targetIndex = findClose(currentNodeList, initialTarget);
+				targetIndex = CommonFunction.findClose(currentNodeList, initialTarget);
 				
 				while(graphGenerator.ObsOverlapList.get(targetIndex)== 1){
 					initialTarget = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
-					targetIndex = findClose(currentNodeList, initialTarget);
+					targetIndex = CommonFunction.findClose(currentNodeList, initialTarget);
 				}
 				
-				closestIndex = findClose(currentNodeList, character.getK().getPosition());
+				closestIndex = CommonFunction.findClose(currentNodeList, character.getK().getPosition());
 				
 				//System.out.println(targetIndex+ ", " + closestIndex);
 				H2 h1 = new H2(currentNodeList, currentEdgeList, targetIndex, closestIndex, OperK);
@@ -399,6 +391,9 @@ public class MainProgram extends PApplet{
 		//record
 		if(breadTimer.checkTimeSlot(200)){
 			character.updateBreadQueue(character.getPosition(), character.getOrientation());
+			for(int i = 0; i < NumberOfBots; i++){
+				Bot[i].updateBreadQueue(Bot[i].getPosition(), Bot[i].getOrientation());
+			}
 		}
 		//display		
 
@@ -408,6 +403,9 @@ public class MainProgram extends PApplet{
 
 		//mapCreate.nodeDisplay(this);
 		character.display();
+		for(int i = 0; i < NumberOfBots; i++){
+			Bot[i].display();
+		}
 
 	}
 /*
@@ -427,23 +425,5 @@ public class MainProgram extends PApplet{
 		text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );	
 		mapCreate.markObstacles(new Vector2(mouseX, mouseY));
 	}
-	public int findClose(List<Node> NodeList, Vector2 Point){
-		int resultIndex = 0;
-		float minDistance = 0;
-		float tempDistance = 0;
-		
-		for(int i = 0; i< NodeList.size();i++){
-			tempDistance = OperK.getDisBy2Points(NodeList.get(i).coordinate, Point);
 
-			if(i == 0){
-				minDistance = tempDistance;
-				resultIndex = i;
-			}
-			if(tempDistance < minDistance){
-				minDistance = tempDistance;
-				resultIndex = i;
-			}
-		}
-		return resultIndex;
-	}	
 }
