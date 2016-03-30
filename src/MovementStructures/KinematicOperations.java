@@ -21,7 +21,7 @@ public class KinematicOperations {
 	
 	public KinematicOperations( PApplet P, SystemParameter Sys){
 		this.parent = P;
-		this.Sys = new SystemParameter(0, 0);
+		this.Sys = new SystemParameter(0, 0, 0);
 		this.Sys = Sys;
 	}
 	
@@ -133,6 +133,9 @@ public class KinematicOperations {
 	//get velocity from orientation
 	public Vector2 getVFromOrien(float Orientation){
 		Vector2 resultVelocity = new Vector2(0, 0);
+		// cos = x, sin =y
+		resultVelocity.x = (float) Math.cos(Orientation);
+		resultVelocity.y = (float) Math.sin(Orientation);
 		return resultVelocity;		
 	}
 	
@@ -140,9 +143,14 @@ public class KinematicOperations {
 	public Vector2 clip2MaxVelocity(Vector2 CurrentVelocity){
 		Vector2 resultVelocity = new Vector2(0, 0);
 		float VLength = getLengthByVector2(CurrentVelocity);
+		System.out.println(VLength);
 		if(VLength > Sys.getMaxV()){
 			resultVelocity = normalizeVector2(CurrentVelocity);
 			resultVelocity = new Vector2(resultVelocity.getX() * Sys.getMaxV(), resultVelocity.getY() * Sys.getMaxV());
+		}
+		else{
+			resultVelocity = new Vector2(CurrentVelocity.x * Sys.getMaxV(), CurrentVelocity.y * Sys.getMaxV());
+			//System.out.println(Sys.getMaxV() +", "+ resultVelocity.y);
 		}
 		
 		return resultVelocity;
@@ -220,5 +228,23 @@ public class KinematicOperations {
 			return false;
 		}
 	}		
-	
+	public float getTheThirdLength(Vector2 v1, Vector2 v2, Vector2 v3){
+		float Result = 0;
+
+		Vector2 V1V2 = new Vector2(v1.x - v2.x, v1.y - v2.y);
+		Vector2 V3V2 = new Vector2(v3.x - v2.x, v3.y - v2.y);
+
+		//System.out.println("input: ("+v1.x+", "+v1.y+") ("+v2.x+", "+v2.y+")("+v3.x+", "+v3.y+")");
+		
+		float cosAngle = ((V1V2.x*V3V2.x)+(V1V2.y*V3V2.y))/(getLengthByVector2(V1V2)*getLengthByVector2(V3V2));
+
+		
+		Result = (float) Math.sqrt(
+				Math.pow(getLengthByVector2(V1V2),2)+
+				Math.pow(getLengthByVector2(V3V2),2)-
+				(2*getLengthByVector2(V1V2)*getLengthByVector2(V3V2)*cosAngle)
+		);
+		System.out.println("cos: "+cosAngle +" result: " + Result);
+		return Result;
+	}
 }

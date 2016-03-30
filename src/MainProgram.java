@@ -96,6 +96,10 @@ public class MainProgram extends PApplet{
 	private ColorVectorRGB backgroundColor;
 	private CharacterDrop character;
 	
+	private CharacterDrop[] Bot;
+	private int NumberOfBots;
+	private List<Integer>[] botsTargetQueue;
+	
 	private Vector2 originalPoint;
 	
 	//Seek function
@@ -119,6 +123,8 @@ public class MainProgram extends PApplet{
 	private MapGenerator mapCreate;
 	private GraphGenerator graphGenerator; 
 	private GraphData G;
+	
+	private Pursue pursue;
 	
 	
 /*
@@ -146,7 +152,7 @@ public class MainProgram extends PApplet{
 		windowWidth = GlobalSetting.screenWidth;
 		windowHeight = GlobalSetting.screenHeight;
 		
-		img = loadImage(".\\Material\\TestBackground.JPG");
+		img = loadImage("TestBackground.JPG");
 		//img = loadImage("Girl.png");
 		
 		size(windowWidth, windowHeight);
@@ -154,7 +160,7 @@ public class MainProgram extends PApplet{
 		// input this operations for each kinematics
 		OperK = new KinematicOperations(this, Sys);
 		// set system parameter: max V, max Acceleration
-		Sys = new SystemParameter(5, 5*0.1f);
+		Sys = new SystemParameter(5, 5*0.1f, PI/2.0f);
 
 		originalPoint = new Vector2(0, 0);
 		//the decision rate
@@ -191,6 +197,9 @@ public class MainProgram extends PApplet{
 			backgroundColor,
 			GlobalSetting.numberOfBread
 		);
+		
+
+		
 		
 		//This part order cannot be changed
 		
@@ -235,6 +244,15 @@ public class MainProgram extends PApplet{
 				
 		);	
 		
+		pursue = new Pursue(OperK, Sys);
+		Vector2 testResult = new Vector2(0, 0);
+		Vector2 temp1 = new Vector2(5, 0);
+		Vector2 temp2 = new Vector2(0, 0);
+		Vector2 temp3 = new Vector2(0, 2);
+		
+		//testResult = pursue.makePrediction(temp2, temp3, temp1);
+		//System.out.println("predicition = " +testResult.x +", " + testResult.y);
+		
 		initialTarget = currentShapePosition;
 		tempResult = new ResultChange(
 				character.getPosition().getX(),
@@ -247,7 +265,36 @@ public class MainProgram extends PApplet{
 				character.getS().getLinearAccel().getX(),
 				character.getS().getLinearAccel().getY(),
 				character.getS().getAngularAccel()
-			);		
+			);	
+		
+		NumberOfBots = GlobalSetting.numberOfbots;
+		Bot = new CharacterDrop[NumberOfBots];
+		//botsTargetQueue = new ArrayList<Integer>[NumberOfBots]();
+		
+		for(int i = 0; i<NumberOfBots ;i ++ ){
+			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+			
+			while(graphGenerator.ObsOverlapList.get(findClose(currentNodeList, botPosition))==1){
+				botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+			}
+			
+			Bot[i] = new CharacterDrop(
+					this,
+					20,
+					20,
+					originalPoint,
+					currentShapePosition,
+					0,
+					initialVelocity,
+					0,
+					OperK,				
+					initialAccel,
+					0,
+					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
+					backgroundColor,
+					GlobalSetting.numberOfBread
+			);
+		}		
 		
 			System.out.println("");
 	}
@@ -259,22 +306,38 @@ public class MainProgram extends PApplet{
  * =========
  */
 
-	
+	int count =0;
+
 	public void draw(){
 		background(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
 		
 		image(img,0,0);
 		
+		
 		character.updatePosition(character.getK().getPosition());
 		character.updateOrientation(character.getK().getOrientation());		
+		
+		for(int i = 0; i < NumberOfBots; i++){
+			Bot[i].updatePosition(Bot[i].getK().getPosition());
+			Bot[i].updateOrientation(Bot[i].getK().getOrientation());		
+		}
+		
+		
+		
 
 		if(isSeeking == false){
-			if(mousePressed){
+			//if(mousePressed){
 				isSeeking = true;
-				initialTarget = new Vector2(mouseX, mouseY);
-				
 				//call path finding
+
+				initialTarget = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
 				targetIndex = findClose(currentNodeList, initialTarget);
+				
+				while(graphGenerator.ObsOverlapList.get(targetIndex)== 1){
+					initialTarget = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+					targetIndex = findClose(currentNodeList, initialTarget);
+				}
+				
 				closestIndex = findClose(currentNodeList, character.getK().getPosition());
 				
 				//System.out.println(targetIndex+ ", " + closestIndex);
@@ -290,23 +353,20 @@ public class MainProgram extends PApplet{
 					System.out.println("Didn't find!!");
 				}
 				else{
-/*
-					System.out.print("\r\nAStar with H1 Path: ");
-					for(int i = 0 ;i < A1.result.size(); i++){
-						System.out.print(" " + A1.result.get(i)+" ");
-					}
-*/
 				}
 				currentTargetQueue.clear();
 				currentTargetQueue.addAll(A1.result);
-			}
+			//}
 	
 		}
 		
-			//Gathering dots
+
+
+		//Gathering dots
 		
 		//make decisions in 0.02 sec frequency
 		if(decisionTimer.checkTimeSlot(20)){
+			count = (count+1)%50;
 			//make one decision
 			if(isSeeking == true){
 				if(currentTargetQueue.size()>0){
@@ -328,9 +388,13 @@ public class MainProgram extends PApplet{
 					isSeeking = false;
 					
 				}
+				if(count == 0){
+					isSeeking = false;
+				}
 				
 			}
 		}
+
 
 		//record
 		if(breadTimer.checkTimeSlot(200)){
@@ -339,7 +403,7 @@ public class MainProgram extends PApplet{
 		//display		
 
 		graphGenerator.edgeDraw();
-		//graphGenerator.displayObstacle();
+		graphGenerator.displayObstacle();
 		//graphGenerator.nodeDisplay(this);
 
 		//mapCreate.nodeDisplay(this);

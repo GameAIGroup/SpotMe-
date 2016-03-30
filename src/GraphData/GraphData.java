@@ -281,48 +281,4 @@ public class GraphData {
 			edgeIter++;
 		}		
 	}
-	public void edgeDraw(){
-		for(int i = 0; i < edgeList.size(); i++){
-			//System.out.println(edgeList.get(i).upIndex + ", " + edgeList.get(i).downIndex+ "     " + weightList.get(i));
-			
-			//if(weightList.get(i)>1){
-			//if(edgeList.get(i).upIndex == 8 && weightList.get(i)==1){
-			if(edgeList.get(i).weight > GlobalSetting.wallWeight){
-				parent.pushMatrix();
-				parent.stroke(255, 0, 0);
-				//parent.fill(255, 255, 255);
-				parent.line(
-						nodeCoordsList.get(edgeList.get(i).upIndex).x,
-						nodeCoordsList.get(edgeList.get(i).upIndex).y,
-						nodeCoordsList.get(edgeList.get(i).downIndex).x,
-						nodeCoordsList.get(edgeList.get(i).downIndex).y
-				);
-				parent.popMatrix();
-
-			}
-			else{
-				parent.pushMatrix();
-				parent.stroke(255, 255, 255);
-				//parent.fill(255, 255, 255);
-				parent.line(
-						nodeCoordsList.get(edgeList.get(i).upIndex).x,
-						nodeCoordsList.get(edgeList.get(i).upIndex).y,
-						nodeCoordsList.get(edgeList.get(i).downIndex).x,
-						nodeCoordsList.get(edgeList.get(i).downIndex).y
-				);
-				parent.popMatrix();
-			}
-/*
-				parent.pushMatrix();	
-					parent.stroke(255, 255, 255);
-					parent.fill(255, 255, 255);
-					parent.text(
-							edgeList.get(i).weight,
-							(nodeList.get((edgeList.get(i).upIndex)).x + nodeList.get((edgeList.get(i).downIndex)).x)/2,
-							(nodeList.get((edgeList.get(i).upIndex)).y + nodeList.get((edgeList.get(i).downIndex)).y)/2
-					);
-			 	parent.popMatrix();
-*/				
-		}		
-	}
 }

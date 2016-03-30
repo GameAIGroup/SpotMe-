@@ -58,7 +58,7 @@ public class GraphGenerator {
 	}
 	
 	public void createEdge(){
-		int numberLine = GlobalSetting.NeededPath;
+		//int numberLine = GlobalSetting.NeededPath;
 		
 		int edgeNumber = 0;
 		
