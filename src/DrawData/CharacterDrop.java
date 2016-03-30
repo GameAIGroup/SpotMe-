@@ -11,6 +11,7 @@ import BasicBehavior.Seek;
 import MovementStructures.*;
 import Variables.CommonFunction;
 import processing.core.PApplet;
+import Variables.GlobalSetting;
 
 public class CharacterDrop {
 	//shape
@@ -39,6 +40,16 @@ public class CharacterDrop {
 	public List<Integer> targetQueue;
 	private ResultChange tempResult;
 	
+	//prediction------------------------------------------------------------------------------------------
+	private int myNumber;
+	private Vector2 prediction;
+	//End of prediction------------------------------------------------------------------------------------
+
+	//Request---------------------------------------------------------------------------------------------
+	private boolean beRequest;
+	private boolean isSeek;
+	//End of Request---------------------------------------------------------------------------------------
+	
 	
 	public CharacterDrop(
 			PApplet P,
@@ -55,8 +66,16 @@ public class CharacterDrop {
 			ColorVectorRGB Color,
 			ColorVectorRGB BackColor,
 			int NumberOfBread,
+			//prediction------------------------------------------------------------------------------------------
+			int number,
+			//End of prediction------------------------------------------------------------------------------------
 			Seek Seek
 	){
+		//prediction------------------------------------------------------------------------------------------
+		myNumber = number;
+				
+		//End of prediction------------------------------------------------------------------------------------
+		
 		breadQueue = new  ArrayList<BreadcrumbInfo>();
 		//testbreadQueue = new  ArrayList<String>();
 
@@ -113,6 +132,47 @@ public class CharacterDrop {
 
 		
 	}
+	
+	
+	//prediction------------------------------------------------------------------------------------------
+	public void updateMyPrediction(Vector2 newPrediction){
+		GlobalSetting.predictions.setMyPrediction(myNumber, newPrediction);
+	}
+	public int getNumber(){
+		return myNumber;
+	}
+		
+	public Vector2 getMyPrediction(){		
+		return GlobalSetting.predictions.getMyPrediction(myNumber);
+	}
+		
+	//End of prediction------------------------------------------------------------------------------------
+
+	//Request---------------------------------------------------------------------------------------------
+	public boolean checkSeekMode(){
+		return isSeek;
+	}
+	
+	public void isSeekMode(){
+		isSeek = true;
+	}
+	public void isWanderMode(){
+		isSeek = false;
+	}
+	
+	public boolean checkRequest(){
+		return beRequest;
+	}
+	public Vector2 givePrediction(){
+		return GlobalSetting.predictions.getMyPrediction(myNumber);
+	}
+	public void receiveRequest(){
+		beRequest = true;
+	}
+		
+	//End of Request---------------------------------------------------------------------------------------
+	
+	
 	
 	//update character position
 	public void updatePosition(Vector2 NewPosition){

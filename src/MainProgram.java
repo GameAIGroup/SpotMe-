@@ -238,6 +238,7 @@ public class MainProgram extends PApplet{
 			tempColor,
 			backgroundColor,
 			GlobalSetting.numberOfBread,
+			0, 
 			Seek
 		);
 		
@@ -258,6 +259,17 @@ public class MainProgram extends PApplet{
 		NumberOfBots = GlobalSetting.numberOfbots;
 		Bot = new CharacterDrop[NumberOfBots];
 		//botsTargetQueue = new ArrayList<Integer>[NumberOfBots]();
+		
+		
+		//prediction------------------------------------------------------------------------------------------		
+		//test Prediction is OK
+		Vector2 a = new Vector2(20, 10);
+		character.updateMyPrediction(a);
+		println(character.getMyPrediction().getX());
+		//End of prediction------------------------------------------------------------------------------------
+
+		
+		
 		
 		for(int i = 0; i<NumberOfBots ;i ++ ){
 			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
@@ -281,6 +293,7 @@ public class MainProgram extends PApplet{
 					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
 					backgroundColor,
 					GlobalSetting.numberOfBread,
+					i,
 					Seek
 			);
 		}		
@@ -315,6 +328,86 @@ public class MainProgram extends PApplet{
 		}
 		
 		
+		
+		//================Decision Tree=================================================================================
+		
+		boolean checkPlayer;
+		boolean inShootingRange;
+		boolean isCloset;
+		boolean haveWeapon;
+		boolean inSafeSpot;
+		boolean receiveRequest; //when to switch back to no receive?
+		int[] otherbots;//
+	
+		if(Bot[1].checkSeekMode() == true){
+			if ( checkPlayer == true){
+				//1. seek mode- purse
+				Bot[1].isSeekMode();
+				Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+				//ask for other wander bots to support
+				for (int i = 0; i < otherbots.length ; i++){
+					if ( Bot[i].checkSeekMode() == false){
+						Bot[i].receiveRequest();
+						//use this bot's prediction
+						Bot[i].updateMyPrediction(Bot[1].givePrediction()); 
+					}
+				}
+				
+				//2. is in shooting range
+				if( inShootingRange == true ){
+					
+					if( isCloset == true ){
+					
+						if( haveWeapon == true){
+							//shoot();
+						}
+						else{//don't have weapon
+							//requestWeapon();
+						}
+					}
+					else{//not the closest
+						Bot[1].isSeekMode();
+						Seek.updateTargetPosition(Bot[1].getMyPrediction());
+					}
+						
+				}
+				else{//not in shooting range
+					Bot[1].isSeekMode();
+					Seek.updateTargetPosition(Bot[1].getMyPrediction());
+				}
+			}
+			else{//no player around
+				if( inSafeSpot == true ){
+					//wander;
+					Bot[1].isWanderMode();
+				}
+				else{//go to prediction from other bots
+					Bot[1].isSeekMode();
+					Seek.updateTargetPosition(Bot[1].getMyPrediction());
+				}
+			}
+		}
+		else{
+			//wandering Mode
+			if ( checkPlayer == true){
+				Bot[1].isSeekMode();
+				Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+				Seek.updateTargetPosition(Bot[1].getMyPrediction());			
+			}
+			else{//no player around
+				if ( character.checkRequest() == true ){
+					Bot[1].isSeekMode();
+					Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+					Seek.updateTargetPosition(Bot[1].getMyPrediction());	
+				}
+				else{
+					//keep wandering
+					Bot[1].isWanderMode();
+				}
+			}
+		}
+		
+		//================End of Decision Tree=================================================================================
 		
 
 		if(isSeeking == false){

@@ -14,6 +14,13 @@ public class GlobalSetting {
 	public static int numberOfbots;
 	
 	public static int wanderTimeBound;
+	
+	
+	//prediction------------------------------------------------------------------------------------------
+	public static Predictions predictions;
+	//End of prediction------------------------------------------------------------------------------------
+	
+	
 	public GlobalSetting(){
 		screenWidth = 800;
 		screenHeight = 600;
@@ -28,5 +35,10 @@ public class GlobalSetting {
 		
 		numberOfbots = 3;
 		wanderTimeBound = 5;
+		
+		
+		//prediction------------------------------------------------------------------------------------------
+		predictions = new Predictions(numberOfbots);
+		//End of prediction------------------------------------------------------------------------------------
 	}
 }
