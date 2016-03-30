@@ -158,6 +158,7 @@ public class CharacterDrop {
 	}
 	public void isWanderMode(){
 		isSeek = false;
+		beRequest = false;
 	}
 	
 	public boolean checkRequest(){
