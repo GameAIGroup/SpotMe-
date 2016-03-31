@@ -225,6 +225,15 @@ public class MainProgram extends PApplet{
 			popMatrix();
 		}
 	}
+	
+	public void checkWinningCondition()
+	{
+		if ((character.getPosition().x > 500) && (character.getPosition().y < 20))
+		{
+			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
+			InitilizeAll();
+		}
+	}
 /*
  * 	(non-Javadoc)
  * @see processing.core.PApplet#draw()
@@ -237,6 +246,8 @@ public class MainProgram extends PApplet{
 
 	
 	public void draw(){
+		
+		checkWinningCondition();
 		
 		background(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
 		
