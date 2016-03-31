@@ -133,8 +133,6 @@ public class MainProgram extends PApplet{
 	private GraphData G;
 	private KinematicOperations kinematicOp;
 
-	public PublicGraph publicG;
-
 	
 	private Pursue pursue;
 	
