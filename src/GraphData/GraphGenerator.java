@@ -4,6 +4,7 @@ import java.util.*;
 import BasicStructures.*;
 import MovementStructures.*;
 import Variables.GlobalSetting;
+import Variables.PublicGraph;
 import processing.core.PApplet;
 
 public class GraphGenerator {
@@ -16,6 +17,10 @@ public class GraphGenerator {
 	
 	public List<ObstacleArea> ObstacleAreaList;
 	public List<Integer> ObsOverlapList;
+	
+	public List<ObstacleArea> SafeSpotsList;
+	public List<Integer> SafeOverlapList;
+	
 	
 	public List<Vector2> obsList;
 	public List<Float> weightList;
@@ -51,6 +56,10 @@ public class GraphGenerator {
 		ObstacleAreaList = new ArrayList<ObstacleArea>() ;
 		ObsOverlapList = new ArrayList<Integer>();
 
+		SafeSpotsList = new ArrayList<ObstacleArea>() ;
+		SafeOverlapList = new ArrayList<Integer>();
+
+		
 		//obsList.addAll(Map.level2);
 		//obsList.addAll(Map.level3);
 		
@@ -320,6 +329,16 @@ public class GraphGenerator {
 					parent.ellipse(nodeList.get(i).x, nodeList.get(i).y, GlobalSetting.nodeSize, GlobalSetting.nodeSize);
 				parent.popMatrix();
 			 }
+			 
+			 if(SafeOverlapList.size()>0){
+				 if(SafeOverlapList.get(i)==1){
+					 	parent.pushMatrix();
+							parent.stroke(0);
+							parent.fill(0, 255, 255);
+							parent.ellipse(nodeList.get(i).x, nodeList.get(i).y, GlobalSetting.nodeSize, GlobalSetting.nodeSize);
+						parent.popMatrix();
+				 }
+			 }
 /*			 	
 				parent.pushMatrix();	
 					parent.stroke(255, 255, 0);
@@ -329,6 +348,73 @@ public class GraphGenerator {
 */
 		 }		 
 
-	 }	
+	 }
+	 public void addSafeSpots(){
+		 ObstacleArea tempArea;
+		 int tempMinX;
+		 int tempMinY;
+		 while(SafeSpotsList.size() <GlobalSetting.numberOfSafeSpot){
+			 tempMinX = (int) (Math.random()*(GlobalSetting.screenWidth-100)+50);
+			 tempMinY = (int) (Math.random()*(GlobalSetting.screenHeight-100)+50);
+			 while(checkObstacle(new Vector2(tempMinX, tempMinY))==true){
+				 tempMinX = (int) (Math.random()*(GlobalSetting.screenWidth-100)+50);
+				 tempMinY = (int) (Math.random()*(GlobalSetting.screenHeight-100)+50);
+			 }
+			 tempArea = new ObstacleArea(tempMinX, tempMinY, tempMinX + GlobalSetting.sizeOfSafeSpot, tempMinY + GlobalSetting.sizeOfSafeSpot);
+			 
+			 SafeSpotsList.add(tempArea);
+		 }
+	 }
+	 public void recreateAllSafeSpots(){
+		 SafeSpotsList.clear();
+		 addSafeSpots();
+	 }
+	 public void displaySafeSpot(){
+			for(int i = 0; i < SafeSpotsList.size(); i++){
+				parent.pushMatrix();
+				parent.stroke(0);
+				parent.fill(150, 0, 0, 125);
+
+				parent.rect(
+						SafeSpotsList.get(i).ObstacleMin.x,
+						SafeSpotsList.get(i).ObstacleMin.y,
+						SafeSpotsList.get(i).ObstacleMax.x - SafeSpotsList.get(i).ObstacleMin.x,
+						SafeSpotsList.get(i).ObstacleMax.y - SafeSpotsList.get(i).ObstacleMin.y
+						);
+
+
+				parent.popMatrix();	
+
+			}		 
+	 }
+	 public boolean checkSafeSpots(Vector2 targetPosition){
+			boolean result = false;
+			for(int i = 0 ; i <SafeSpotsList.size(); i++){
+				if(targetPosition.x >= SafeSpotsList.get(i).ObstacleMin.x -GlobalSetting.obstacleMargin && targetPosition.x <= SafeSpotsList.get(i).ObstacleMax.x +GlobalSetting.obstacleMargin){
+					if(targetPosition.y >= SafeSpotsList.get(i).ObstacleMin.y -GlobalSetting.obstacleMargin && targetPosition.y <= SafeSpotsList.get(i).ObstacleMax.y +GlobalSetting.obstacleMargin){
+						// overlap with obstacle
+						result = true;
+						return result;
+					}
+				}
+			}
+			return result;
+	 }
+	 public void updateOverlapSafeSpots(){
+		 SafeOverlapList.clear();
+		 for(int i = 0 ; i <PublicGraph.G.nodeList.size(); i++){
+			 if(checkSafeSpots(PublicGraph.G.nodeList.get(i).coordinate)==true){
+				 SafeOverlapList.add(1);
+			 }
+			 else{
+				 SafeOverlapList.add(0);
+			 }
+		 }
+	 }
+	 public void removeSafeSpots(int index){
+		 if(SafeSpotsList.size()>index){
+			 SafeSpotsList.remove(index);
+		 }
+	 }
 
 }

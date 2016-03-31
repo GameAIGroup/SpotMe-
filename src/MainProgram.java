@@ -401,6 +401,21 @@ public class MainProgram extends PApplet{
 		
 		//make decisions in 0.02 sec frequency
 		if(decisionTimer.checkTimeSlot(20)){
+			//for test safe spot
+			count = (count+1)%200;
+			if(count == 0){
+				PublicGraph.graphGenerator.recreateAllSafeSpots();
+				PublicGraph.graphGenerator.updateOverlapSafeSpots();
+				
+			}
+			else if(count == 100){
+				int tempIndex = (int) (Math.random()*PublicGraph.graphGenerator.SafeSpotsList.size());
+				PublicGraph.graphGenerator.removeSafeSpots(tempIndex);
+				PublicGraph.graphGenerator.addSafeSpots();
+				PublicGraph.graphGenerator.updateOverlapSafeSpots();
+			}
+			
+			
 			for(int i = 0 ; i < NumberOfBots; i++){
 				Bot[i].Wander();
 			}
@@ -418,6 +433,8 @@ public class MainProgram extends PApplet{
 
 		PublicGraph.graphGenerator.edgeDraw();
 		PublicGraph.graphGenerator.displayObstacle();
+		PublicGraph.graphGenerator.displaySafeSpot();
+		PublicGraph.graphGenerator.nodeDisplay(this);
 		//graphGenerator.nodeDisplay(this);
 
 		//mapCreate.nodeDisplay(this);

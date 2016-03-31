@@ -17,6 +17,9 @@ public class GlobalSetting {
 	
 	public static int keyMoveDistance;
 	
+	public static int sizeOfSafeSpot;
+	public static int numberOfSafeSpot;
+	
 	
 	//prediction------------------------------------------------------------------------------------------
 	public static Predictions predictions;
@@ -44,5 +47,8 @@ public class GlobalSetting {
 		//End of prediction------------------------------------------------------------------------------------
 		
 		keyMoveDistance = 10;
+		
+		sizeOfSafeSpot = 50;
+		numberOfSafeSpot = 5;
 	}
 }

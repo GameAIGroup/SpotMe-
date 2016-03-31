@@ -30,5 +30,9 @@ public class PublicGraph {
 		graphGenerator.createEdge();
 		
 		G = new GraphData(graphGenerator.nodeList, graphGenerator.edgeList, P);			
+		
+		graphGenerator.recreateAllSafeSpots();
+		graphGenerator.updateOverlapSafeSpots();
+		
 	}
 }
