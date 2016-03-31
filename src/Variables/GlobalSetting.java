@@ -61,7 +61,7 @@ public class GlobalSetting {
 		
 		characterHealthPoints = 100;
 		characterMaxHealth = 100;
-		deductionPerShot = 2;
+		deductionPerShot = 4;
 
 		characterLives = 3;		
 		

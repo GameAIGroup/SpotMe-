@@ -52,6 +52,7 @@
  * ==============
  */
 
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -91,6 +92,7 @@ public class MainProgram extends PApplet{
  * Variables for Shared Setting
  * ============================
  */
+	private boolean isGameOver = false;
 	private int windowWidth;
 	private int windowHeight;
 
@@ -126,7 +128,7 @@ public class MainProgram extends PApplet{
 	
 	
 
-	private PImage img;
+	private PImage img, gameOver;
 
 	private PImage[] LevelBack;
 	
@@ -188,6 +190,7 @@ public class MainProgram extends PApplet{
 		windowHeight = GlobalSetting.screenHeight;
 
 		img = loadImage("TestBackground.JPG");
+		gameOver = loadImage("game-over.jpg");
 		
 		LevelBack = new PImage[3];
 		for(int i = 0 ;i < GlobalSetting.LevelNumber; i++){
@@ -246,6 +249,11 @@ public class MainProgram extends PApplet{
 
 	
 	public void draw(){
+		if (isGameOver)
+		{
+			image(gameOver,width/4, height/4, width/2, height/2);
+			return;
+		}
 		
 		checkWinningCondition();
 		
@@ -390,6 +398,10 @@ public class MainProgram extends PApplet{
 			{
 				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
 				GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-GlobalSetting.deductionPerShot)%GlobalSetting.characterMaxHealth;
+				if (GlobalSetting.characterHealthPoints <= 0)
+				{
+					isGameOver = true;
+				}
 			}
 		}
 	}
