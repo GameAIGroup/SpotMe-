@@ -9,6 +9,8 @@ public class Node {
 	public Vector2 coordinate;
 	public List<Edge> edge;
 	public List<IndexWeightPair> adj;
+	public double changeInOr;
+	public double distanceFromBot;
 	
 	public Node(int Index, float CoordinateX, float CoordinateY){
 		edge = new ArrayList<Edge>();

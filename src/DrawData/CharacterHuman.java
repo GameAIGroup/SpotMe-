@@ -9,6 +9,10 @@ import BasicStructures.ColorVectorRGB;
 import BasicStructures.Vector2;
 import GraphAlgorithm.AStar;
 import GraphAlgorithm.H2;
+import GraphData.BotVision;
+import GraphData.GraphData;
+import GraphData.GraphGenerator;
+import GraphData.Node;
 import MovementStructures.KinematicData;
 import MovementStructures.KinematicOperations;
 import MovementStructures.ResultChange;
@@ -19,7 +23,7 @@ import Variables.GlobalSetting;
 import Variables.PublicGraph;
 import processing.core.PApplet;
 
-public class CharacterHuman  {
+public class CharacterHuman  extends PApplet{
 	//shape
 	//private DropShape nowShape;
 	private ColorVectorRGB shapeColor;
@@ -426,5 +430,102 @@ public class CharacterHuman  {
 
 	}
 	
-
+	public float getChangeInOrientation(float or1, float or2)
+	{
+		float changeInOr;
+		changeInOr = or1 - or2;
+		
+		if (or2 < Math.PI/2 && or1 >= 0)
+		{
+			if ((or1 > 3*Math.PI/2))
+			{
+				changeInOr = (float)(-1 * (2*Math.PI - or1 + or2));
+			}
+			else
+			{
+				changeInOr = or1 - or2;
+			}
+		}
+		
+		else if (or2 > 3*Math.PI/2)
+		{
+			if (or1 >= 0)
+			{
+				changeInOr = or1 + (float)(2*Math.PI - or2);
+			}
+		}
+		
+		return changeInOr;
+	}
+	
+	public BotVision getVisionRangeNodes(GraphData G, KinematicOperations OperK, GraphGenerator graphGenerator,
+			CharacterDrop character)
+	{
+		float maxOrientation, minOrientation, resultantOr, changeInOr, currentOr, maxAllowedDistance;
+		Vector2 vector;
+		Vector2 distanceVector;
+		List<Node> tempFilteredNodes = new ArrayList<Node>();
+		List<Node> filteredNodes = new ArrayList<Node>();
+		Node maxOrNode = null;
+		Node minOrNode = null;
+		
+		maxOrientation = Float.NEGATIVE_INFINITY;
+		minOrientation = Float.POSITIVE_INFINITY;
+		maxAllowedDistance = Float.POSITIVE_INFINITY;
+		
+		for (Node node: G.nodeList)
+		{
+			vector = new Vector2(node.coordinate.x, node.coordinate.y);
+			distanceVector = new Vector2((vector.x - this.getPosition().x), (vector.y - this.getPosition().y));
+			currentOr = this.getOrientation();
+			resultantOr = OperK.getOrientationByV(currentOr, distanceVector);
+			changeInOr = getChangeInOrientation(resultantOr, this.getOrientation());
+			node.changeInOr = changeInOr;
+			double distance = Math.sqrt(Math.pow(vector.x - this.getPosition().x, 2) + Math.pow(vector.y - this.getPosition().y, 2));
+			node.distanceFromBot = distance;
+			if ( Math.abs(changeInOr) < (GlobalSetting.maxVisionAngle/2) && distance < 250)
+			{
+				if(!graphGenerator.checkObstacle(vector))
+				{	
+					tempFilteredNodes.add(node);
+				}
+				else
+				{
+					if (changeInOr > maxOrientation)
+					{
+						maxOrNode = node;
+						maxOrientation = changeInOr;
+					}
+					if (changeInOr < minOrientation)
+					{
+						minOrNode = node;
+						minOrientation = changeInOr;
+					}
+					if (distance < maxAllowedDistance)
+					{
+						maxAllowedDistance = (float)distance;
+					}
+				}
+			}
+		}
+		
+		for (Node node: tempFilteredNodes)
+		{
+			if (!(node.changeInOr < maxOrientation && node.changeInOr > minOrientation))
+			{
+					filteredNodes.add(node);
+			}
+			else
+			{
+				if (node.distanceFromBot < maxAllowedDistance)
+				{
+					filteredNodes.add(node);
+				}
+			}
+		}
+		
+		BotVision botVision = new BotVision(maxOrientation, minOrientation, maxAllowedDistance, filteredNodes);
+		
+		return botVision;
+	}
 }

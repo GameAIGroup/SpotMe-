@@ -64,6 +64,7 @@ import GraphAlgorithm.Dijkstra;
 import GraphAlgorithm.H1;
 import GraphAlgorithm.H2;
 import GraphAlgorithm.H3;
+import GraphData.BotVision;
 import GraphData.Edge;
 import GraphData.GraphData;
 import GraphData.GraphGenerator;
@@ -99,7 +100,6 @@ public class MainProgram extends PApplet{
 	//Setting for environment
 	private ColorVectorRGB backgroundColor;
 	private CharacterDrop character;
-	private CharacterDrop bot;
 	
 	private CharacterHuman[] Bot;
 	//private CharacterHuman test;
@@ -120,6 +120,8 @@ public class MainProgram extends PApplet{
 	
 	private List<Node> currentNodeList;
 	private List<Edge> currentEdgeList;
+	private List<Node> highlightedNodes;
+	private BotVision botVision;
 	
 	
 
@@ -196,9 +198,9 @@ public class MainProgram extends PApplet{
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
 		
-		Vector2 currentShapePosition = new Vector2(64 , windowHeight-64);
+		Vector2 currentShapePosition = new Vector2(264 , windowHeight-64);
 		currentShapePosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, currentShapePosition)).coordinate;
-		Vector2 currentBotPosition = new Vector2(264 , windowHeight-64);
+		Vector2 currentBotPosition = new Vector2(164 , windowHeight-64);
 
 		Vector2 initialVelocity = new Vector2(0, 0);
 		Vector2 initialAccel = new Vector2(0, 0);
@@ -206,28 +208,11 @@ public class MainProgram extends PApplet{
 		
 		//set character
 		character = new CharacterDrop(
-			this,
-			20,
-			20,
-			originalPoint,
-			currentShapePosition,
-			0,
-			initialVelocity,
-			0,
-			OperK,				
-			initialAccel,
-			0,
-			tempColor,
-			backgroundColor,
-			GlobalSetting.numberOfBread
-		);
-
-		bot = new CharacterDrop(
 				this,
 				20,
 				20,
 				originalPoint,
-				currentBotPosition,
+				currentShapePosition,
 				0,
 				initialVelocity,
 				0,
@@ -236,8 +221,10 @@ public class MainProgram extends PApplet{
 				0,
 				tempColor,
 				backgroundColor,
-				GlobalSetting.numberOfBread
-			);
+				GlobalSetting.numberOfBread,
+				Sys,
+				0
+		);
 		
 		//This part order cannot be changed
 		
@@ -338,6 +325,8 @@ public class MainProgram extends PApplet{
 					Sys,
 					0
 			);
+			
+			Bot[0].updatePosition(currentBotPosition);
 		}		
 		
 		
@@ -353,72 +342,11 @@ public class MainProgram extends PApplet{
 		System.out.println("");
 	}
 	
-	public List<Node> getVisionRangeNodes(CharacterDrop bot)
-	{
-		float maxOrientation, minOrientation, resultantOr, changeInOr, currentOr, maxDistance;
-		maxOrientation = Float.NEGATIVE_INFINITY;
-		minOrientation = Float.POSITIVE_INFINITY;
-		
-		List<Node> filteredNodes = new ArrayList<Node>();
-		List<Node> filteredNodes2 = new ArrayList<Node>();
-		
-		Node maxOrNode = null;
-		Node minOrNode = null;
-		
-		for (Node node: G.nodeList)
-		{
-			Vector2 vector = new Vector2(node.coordinate.x, node.coordinate.y);
-			Vector2 vector2 = new Vector2((vector.x - bot.getPosition().x), (vector.y - bot.getPosition().y));
-			currentOr = bot.getOrientation();
-			resultantOr = OperK.getOrientationByV(bot.getOrientation(), vector2);
-			changeInOr = (Math.min(abs(currentOr - resultantOr), abs((float) ((6.28 - currentOr) - resultantOr))));
-			if ( changeInOr < (GlobalSetting.maxVisionAngle/2))
-			{
-				if(!graphGenerator.checkObstacle(vector))
-				{	
-					filteredNodes.add(node);
-				}
-				else
-				{
-					if (resultantOr > maxOrientation)
-					{
-						maxOrNode = node;
-						maxOrientation = resultantOr;
-					}
-					if (resultantOr < minOrientation)
-					{
-						if (abs(maxOrientation - resultantOr) < GlobalSetting.maxVisionAngle/2)
-						{
-							minOrNode = node;
-							minOrientation = resultantOr;
-						}
-					}
-				}
-			}
-		}
-		
-		for (Node node: filteredNodes)
-		{
-			Vector2 vector2 = new Vector2((node.coordinate.x - bot.getPosition().x), (node.coordinate.y - bot.getPosition().y));
-			resultantOr = OperK.getOrientationByV(bot.getOrientation(), vector2);
-			//currentOr = bot.getOrientation();
-			//changeInOr = (Math.min(abs(currentOr - resultantOr), abs((float) ((6.28 - currentOr) - resultantOr))));
-			if (!(resultantOr < maxOrientation && resultantOr > minOrientation))
-			{
-				filteredNodes2.add(node);
-			}
-		}
-		
-		filteredNodes2.add(maxOrNode);
-		filteredNodes2.add(minOrNode);
-		return filteredNodes2;
-	}
-	
-	public void HighlightNodes(List<Node> nodes)
+	private void HighlightNodes(List<Node> nodes)
 	{
 		for (Node node: nodes)
 		{
-			ellipse(node.coordinate.x, node.coordinate.y, 10, 10);
+			ellipse(node.coordinate.x, node.coordinate.y, (float)10, (float)10);
 		}
 	}
 /*
@@ -445,11 +373,6 @@ public class MainProgram extends PApplet{
 			Bot[i].updatePosition(Bot[i].getK().getPosition());
 			Bot[i].updateOrientation(Bot[i].getK().getOrientation());		
 		}
-		
-		bot.updatePosition(bot.getK().getPosition());
-		bot.updateOrientation(bot.getK().getOrientation());
-		
-		bot.display();
 
 		//================Decision Tree=================================================================================
 		
@@ -586,26 +509,16 @@ public class MainProgram extends PApplet{
 			Bot[i].display();
 		}
 		
-		List<Node> visionRangeNodes = getVisionRangeNodes(bot);
-		HighlightNodes(visionRangeNodes);
+		for(int i = 0; i < NumberOfBots; i++){
+			botVision = Bot[i].getVisionRangeNodes(G, OperK, graphGenerator, character); 
+			HighlightNodes(botVision.visionNodes);
+			if (botVision.isCharacterInVision(character, Bot[i], OperK))
+			{
+				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
+			}
+		}
 	}
 	
-	
-	public void keyPressed()
-	{
-	  if(key == CODED)
-	  {
-	    if (keyCode == LEFT)
-	    {
-	      bot.updateOrientation(abs((float)((bot.getOrientation() - 0.1) % 6.28)));
-	    }
-	    if(keyCode == RIGHT)
-	    {
-	    	bot.updateOrientation(abs((float)((bot.getOrientation() - 0.1) % 6.28)));
-	    }
-	    
-	  }
-	}
 /*
  * ==========================
  * Start Point of the Program
