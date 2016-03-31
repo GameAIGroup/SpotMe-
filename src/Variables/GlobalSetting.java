@@ -23,6 +23,7 @@ public class GlobalSetting {
 	
 	public static int characterHealthPoints;
 	public static int characterMaxHealth;
+	public static int deductionPerShot;
 
 	public static int characterLives;
 	
@@ -60,6 +61,7 @@ public class GlobalSetting {
 		
 		characterHealthPoints = 100;
 		characterMaxHealth = 100;
+		deductionPerShot = 2;
 
 		characterLives = 3;		
 		

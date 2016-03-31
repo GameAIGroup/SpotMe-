@@ -354,10 +354,6 @@ public class MainProgram extends PApplet{
 			//For testing safe spots
 			CommonFunction.activateSafeSpot(count, 0, 100);
 			
-			if(count%2 == 0){
-				GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-1)%GlobalSetting.characterMaxHealth;
-			}
-			
 			for(int i = 0 ; i < NumberOfBots; i++){
 				Bot[i].Wander();
 			}
@@ -393,6 +389,7 @@ public class MainProgram extends PApplet{
 			if (botVision.isCharacterInVision(character, Bot[i], OperK))
 			{
 				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
+				GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-GlobalSetting.deductionPerShot)%GlobalSetting.characterMaxHealth;
 			}
 		}
 	}
@@ -415,6 +412,7 @@ public class MainProgram extends PApplet{
 		PublicGraph.mapCreate.markObstacles(new Vector2(mouseX, mouseY));
 	}
 	public void InitilizeAll(){
+		GlobalSetting.characterHealthPoints = GlobalSetting.characterMaxHealth;
 		//setLevel = true;
 		PublicGraph.mapCreate.readObstacle(this, GlobalSetting.LevelControl+1);
 		PublicGraph.graphGenerator = new GraphGenerator(PublicGraph.mapCreate, OperK, this);
