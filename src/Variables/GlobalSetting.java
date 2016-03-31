@@ -20,6 +20,10 @@ public class GlobalSetting {
 	public static int sizeOfSafeSpot;
 	public static int numberOfSafeSpot;
 	
+	public static int characterHealthPoints;
+	public static int characterMaxHealth;
+
+	public static int characterLives;
 	
 	//prediction------------------------------------------------------------------------------------------
 	public static Predictions predictions;
@@ -50,5 +54,11 @@ public class GlobalSetting {
 		
 		sizeOfSafeSpot = 50;
 		numberOfSafeSpot = 5;
+		
+		characterHealthPoints = 100;
+		characterMaxHealth = 100;
+
+		characterLives = 3;		
+		
 	}
 }

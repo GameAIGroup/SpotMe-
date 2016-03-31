@@ -71,6 +71,7 @@ import GraphData.MapGenerator;
 import GraphData.Node;
 import MovementStructures.*;
 import Variables.CommonFunction;
+import Variables.GameDisplay;
 //import OldFile.*;
 import Variables.GlobalSetting;
 import Variables.PublicGraph;
@@ -122,11 +123,9 @@ public class MainProgram extends PApplet{
 
 	private PImage img;
 	
-	public PublicGraph publicG;
 
 	
 	private Pursue pursue;
-	public CommonFunction CF;
 	
 	//key control
 	private int upMove;
@@ -149,9 +148,12 @@ public class MainProgram extends PApplet{
  * Setting and Initializations
  * ===========================
  */
+	public PublicGraph publicG;
+	public CommonFunction CF;
 	
 	public static SystemParameter Sys;
 	public static GlobalSetting globalS;
+	public static GameDisplay gameDisplay;
 	
 	public void settings(){
 
@@ -163,6 +165,8 @@ public class MainProgram extends PApplet{
 
 		CF = new CommonFunction(OperK);
 		publicG = new PublicGraph(this, OperK);
+		
+		gameDisplay = new GameDisplay(this);
 
 		
 		windowWidth = GlobalSetting.screenWidth;
@@ -415,6 +419,9 @@ public class MainProgram extends PApplet{
 				PublicGraph.graphGenerator.updateOverlapSafeSpots();
 			}
 			
+			if(count%2 == 0){
+				GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-1)%GlobalSetting.characterMaxHealth;
+			}
 			
 			for(int i = 0 ; i < NumberOfBots; i++){
 				Bot[i].Wander();
@@ -430,12 +437,14 @@ public class MainProgram extends PApplet{
 			}
 		}
 		//display		
-
+		GameDisplay.displayLives();
+		
 		PublicGraph.graphGenerator.edgeDraw();
-		PublicGraph.graphGenerator.displayObstacle();
+		//PublicGraph.graphGenerator.displayObstacle();
 		PublicGraph.graphGenerator.displaySafeSpot();
-		PublicGraph.graphGenerator.nodeDisplay(this);
-		//graphGenerator.nodeDisplay(this);
+		//PublicGraph.graphGenerator.nodeDisplay(this);
+		GameDisplay.displayLives();
+		GameDisplay.displayHealth();
 
 		//mapCreate.nodeDisplay(this);
 		character.display();
