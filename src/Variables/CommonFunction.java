@@ -42,5 +42,22 @@ public class CommonFunction {
 
 		}
 		return resultIndex;
-	}	
+	}
+	public static void activateSafeSpot(int cycleCount, int countForRegenerate, int countForAddOne){
+		//for test safe spot
+		if(cycleCount == countForRegenerate){
+			PublicGraph.graphGenerator.recreateAllSafeSpots();
+			PublicGraph.graphGenerator.updateOverlapSafeSpots();
+			
+		}
+		else if(cycleCount == countForAddOne){
+			int tempIndex = (int) (Math.random()*PublicGraph.graphGenerator.SafeSpotsList.size());
+			PublicGraph.graphGenerator.removeSafeSpots(tempIndex);
+			PublicGraph.graphGenerator.addSafeSpots();
+			PublicGraph.graphGenerator.updateOverlapSafeSpots();
+		}
+		
+		
+				
+	}
 }

@@ -30,6 +30,8 @@ public class GlobalSetting {
 	public static Predictions predictions;
 	//End of prediction------------------------------------------------------------------------------------
 	
+	public static int LevelControl;
+	public static int LevelNumber; 
 	
 	public GlobalSetting(){
 		screenWidth = 800;
@@ -37,7 +39,7 @@ public class GlobalSetting {
 		
 		HeuristicMode = 1;
 
-		numberOfBread = 10;
+		numberOfBread = 1;
 		
 		tileNumber = 50;
 		nodeSize = 5;
@@ -60,6 +62,9 @@ public class GlobalSetting {
 		characterMaxHealth = 100;
 
 		characterLives = 3;		
+		
+		LevelControl = 0;
+		LevelNumber = 3;
 		
 		tileNumber = 100;
 		nodeSize = 5;

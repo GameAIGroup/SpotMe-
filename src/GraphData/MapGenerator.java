@@ -171,7 +171,7 @@ public class MapGenerator {
 	    
 	}
 	//load files
-	public void readObstacle(PApplet p){
+	public void readObstacle(PApplet p, int level){
 		PApplet parent = p;
 	    FileReader obstacle1 = null;
 	    String tempS;
@@ -179,9 +179,10 @@ public class MapGenerator {
 	    float x;
 	    float y;
 	    BufferedReader br;
+	    obstacleNode.clear();
 	    
 	    try {
-			obstacle1 = new FileReader("Obstacles.txt");
+			obstacle1 = new FileReader("Obstacles"+level+".txt");
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

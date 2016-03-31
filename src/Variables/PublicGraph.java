@@ -23,7 +23,7 @@ public class PublicGraph {
 		mapCreate.drawDot(GlobalSetting.tileNumber, GlobalSetting.screenWidth, GlobalSetting.screenHeight);
 		
 		mapCreate.readTile(P);
-		mapCreate.readObstacle(P);
+		mapCreate.readObstacle(P, 1);
 		//mapCreate.isObstacle = true;
 		
 		graphGenerator = new GraphGenerator(mapCreate, OperK, P);

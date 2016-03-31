@@ -163,7 +163,7 @@ public class GraphGenerator {
 			//if(weightList.get(i)>1){
 			//if(edgeList.get(i).upIndex == 8 && weightList.get(i)==1){
 				parent.pushMatrix();
-				parent.stroke(255, 255, 255);
+				parent.stroke(0, 0, 0);
 				//parent.fill(255, 255, 255);
 				parent.line(
 						nodeList.get(edgeList.get(i).upIndex).x,

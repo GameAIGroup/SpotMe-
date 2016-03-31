@@ -52,6 +52,7 @@
  * ==============
  */
 
+import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -127,11 +128,16 @@ public class MainProgram extends PApplet{
 
 	private PImage img;
 
+	private PImage[] LevelBack;
+	
+
+
         //for graph
 	private MapGenerator mapCreate;
 	private GraphGenerator graphGenerator; 
 	private GraphData G;
 	private KinematicOperations kinematicOp;
+
 
 	
 	private Pursue pursue;
@@ -161,6 +167,7 @@ public class MainProgram extends PApplet{
 	public static SystemParameter Sys;
 	public static GlobalSetting globalS;
 	public static GameDisplay gameDisplay;
+	boolean setLevel = false;
 	
 	public void settings(){
 
@@ -181,6 +188,11 @@ public class MainProgram extends PApplet{
 		windowHeight = GlobalSetting.screenHeight;
 
 		img = loadImage("TestBackground.JPG");
+		
+		LevelBack = new PImage[3];
+		for(int i = 0 ;i < GlobalSetting.LevelNumber; i++){
+			LevelBack[i] = loadImageIO("Level"+(i+1)+".JPG");
+		}
 		backgroundColor = new ColorVectorRGB(255, 255, 255);
 
 		size(windowWidth, windowHeight);
@@ -196,146 +208,9 @@ public class MainProgram extends PApplet{
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
 		
-		Vector2 currentShapePosition = new Vector2(264 , windowHeight-64);
-		currentShapePosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, currentShapePosition)).coordinate;
-		Vector2 currentBotPosition = new Vector2(164 , windowHeight-64);
 
-		Vector2 initialVelocity = new Vector2(0, 0);
-		Vector2 initialAccel = new Vector2(0, 0);
-		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
-		
-		//set character
-		character = new CharacterDrop(
-				this,
-				20,
-				20,
-				originalPoint,
-				currentShapePosition,
-				0,
-				initialVelocity,
-				0,
-				OperK,				
-				initialAccel,
-				0,
-				tempColor,
-				backgroundColor,
-				GlobalSetting.numberOfBread,
-				Sys,
-				0
-		);
-		
-		//This part order cannot be changed
-		
-		mapCreate = new MapGenerator(5, 7, "test.txt");
-		//mapCreate.createRandomGraph("random.txt");
-
-		mapCreate.drawDot(GlobalSetting.tileNumber, windowWidth, windowHeight);
-		
-		mapCreate.readTile(this);
-		mapCreate.readObstacle(this);
-		//mapCreate.isObstacle = true;
-		
-		graphGenerator = new GraphGenerator(mapCreate, OperK, this);
-		graphGenerator.createEdge();
-		
-		G = new GraphData(graphGenerator.nodeList, graphGenerator.edgeList, this);	
-
-		currentNodeList = new ArrayList<Node>();
-		currentNodeList = PublicGraph.G.nodeList;
-		
-		currentEdgeList = new ArrayList<Edge>();
-		currentEdgeList = PublicGraph.G.edgeList;
-
-	
-		//Seek for test 
-	
-		
-		//set character
-		character = new CharacterDrop(
-				this,
-				20,
-				20,
-				originalPoint,
-				currentShapePosition,
-				0,
-				initialVelocity,
-				0,
-				OperK,				
-				initialAccel,
-				0,
-				tempColor,
-				backgroundColor,
-				GlobalSetting.numberOfBread,
-				Sys,
-				0
-		);
-		
-		initialTarget = currentShapePosition;
-		tempResult = new ResultChange(
-				character.getPosition().getX(),
-				character.getPosition().getY(),
-				character.getK().getOrientation(),
-				character.getK().getVelocity().getX(),
-				character.getK().getVelocity().getY(),
-				character.getK().getRotation(),
-				OperK,
-				character.getS().getLinearAccel().getX(),
-				character.getS().getLinearAccel().getY(),
-				character.getS().getAngularAccel()
-		);	
-		
-		NumberOfBots = GlobalSetting.numberOfbots;
-		Bot = new CharacterHuman[NumberOfBots];
-		//botsTargetQueue = new ArrayList<Integer>[NumberOfBots]();
-
-		//prediction------------------------------------------------------------------------------------------		
-		//test Prediction is OK
-		Vector2 a = new Vector2(20, 10);
-		character.updateMyPrediction(a);
-		System.out.println(character.getMyPrediction().getX());
-		//End of prediction------------------------------------------------------------------------------------
-
-				
-		
-		for(int i = 0; i<NumberOfBots ;i ++ ){
-			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
-			
-			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
-				botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
-			}
-			
-			Bot[i] = new CharacterHuman(
-					this,
-					20,
-					20,
-					originalPoint,
-					botPosition,
-					0,
-					initialVelocity,
-					0,
-					OperK,				
-					initialAccel,
-		
-					0,
-					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
-					backgroundColor,
-					GlobalSetting.numberOfBread,
-					Sys,
-					0
-			);
-			
-			Bot[0].updatePosition(currentBotPosition);
-		}		
-		
-		
-		currentTargetQueue = new ArrayList<Integer>();
-		
-		//key control
-		upMove = 0;
-		downMove = 0;
-		leftMove = 0;
-		rightMove = 0;
-		
+		//What should be redo 
+		InitilizeAll();
 		
 		System.out.println("");
 	}
@@ -357,13 +232,13 @@ public class MainProgram extends PApplet{
 
 	int count =0;
 
+	
 	public void draw(){
 		
 		background(backgroundColor.getR(), backgroundColor.getG(), backgroundColor.getB());
 		
-		image(img,0,0);
-		
-		
+		image(LevelBack[GlobalSetting.LevelControl],0,0);
+	
 		character.updatePosition(character.getK().getPosition());
 		character.updateOrientation(character.getK().getOrientation());		
 		
@@ -371,6 +246,7 @@ public class MainProgram extends PApplet{
 			Bot[i].updatePosition(Bot[i].getK().getPosition());
 			Bot[i].updateOrientation(Bot[i].getK().getOrientation());		
 		}
+		
 
 		//================Decision Tree=================================================================================
 		
@@ -460,19 +336,9 @@ public class MainProgram extends PApplet{
 		
 		//make decisions in 0.02 sec frequency
 		if(decisionTimer.checkTimeSlot(20)){
-			//for test safe spot
-			count = (count+1)%200;
-			if(count == 0){
-				PublicGraph.graphGenerator.recreateAllSafeSpots();
-				PublicGraph.graphGenerator.updateOverlapSafeSpots();
-				
-			}
-			else if(count == 100){
-				int tempIndex = (int) (Math.random()*PublicGraph.graphGenerator.SafeSpotsList.size());
-				PublicGraph.graphGenerator.removeSafeSpots(tempIndex);
-				PublicGraph.graphGenerator.addSafeSpots();
-				PublicGraph.graphGenerator.updateOverlapSafeSpots();
-			}
+			count = (count +1)%200;
+			//For testing safe spots
+			CommonFunction.activateSafeSpot(count, 0, 100);
 			
 			if(count%2 == 0){
 				GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-1)%GlobalSetting.characterMaxHealth;
@@ -496,8 +362,8 @@ public class MainProgram extends PApplet{
 		
 		PublicGraph.graphGenerator.edgeDraw();
 		//PublicGraph.graphGenerator.displayObstacle();
-		PublicGraph.graphGenerator.displaySafeSpot();
-		PublicGraph.graphGenerator.nodeDisplay(this);
+		//PublicGraph.graphGenerator.displaySafeSpot();
+		//PublicGraph.graphGenerator.nodeDisplay(this);
 		GameDisplay.displayLives();
 		GameDisplay.displayHealth();
 
@@ -533,6 +399,120 @@ public class MainProgram extends PApplet{
 		ellipse( mouseX, mouseY, 5, 5 );
 		text( "x: " + mouseX + " y: " + mouseY, mouseX + 2, mouseY );	
 		PublicGraph.mapCreate.markObstacles(new Vector2(mouseX, mouseY));
+	}
+	public void InitilizeAll(){
+		//setLevel = true;
+		PublicGraph.mapCreate.readObstacle(this, GlobalSetting.LevelControl+1);
+		PublicGraph.graphGenerator = new GraphGenerator(PublicGraph.mapCreate, OperK, this);
+		PublicGraph.graphGenerator.createEdge();
+		
+		PublicGraph.G = new GraphData(PublicGraph.graphGenerator.nodeList, PublicGraph.graphGenerator.edgeList, this);			
+		
+		PublicGraph.graphGenerator.recreateAllSafeSpots();
+		PublicGraph.graphGenerator.updateOverlapSafeSpots();	
+		
+		Vector2 currentShapePosition = new Vector2(64 , windowHeight-64);
+		currentShapePosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, currentShapePosition)).coordinate;
+		Vector2 initialVelocity = new Vector2(0, 0);
+		Vector2 initialAccel = new Vector2(0, 0);
+		ColorVectorRGB tempColor = new ColorVectorRGB(23, 228, 119);
+
+	
+
+		currentNodeList = new ArrayList<Node>();
+		currentNodeList = PublicGraph.G.nodeList;
+		
+		currentEdgeList = new ArrayList<Edge>();
+		currentEdgeList = PublicGraph.G.edgeList;
+
+	
+		//Seek for test 
+	
+		
+		//set character
+		character = new CharacterDrop(
+				this,
+				20,
+				20,
+				originalPoint,
+				currentShapePosition,
+				0,
+				initialVelocity,
+				0,
+				OperK,				
+				initialAccel,
+				0,
+				tempColor,
+				backgroundColor,
+				GlobalSetting.numberOfBread,
+				Sys,
+				0
+		);
+		
+		initialTarget = currentShapePosition;
+		tempResult = new ResultChange(
+				character.getPosition().getX(),
+				character.getPosition().getY(),
+				character.getK().getOrientation(),
+				character.getK().getVelocity().getX(),
+				character.getK().getVelocity().getY(),
+				character.getK().getRotation(),
+				OperK,
+				character.getS().getLinearAccel().getX(),
+				character.getS().getLinearAccel().getY(),
+				character.getS().getAngularAccel()
+		);	
+		
+		NumberOfBots = GlobalSetting.numberOfbots;
+		Bot = new CharacterHuman[NumberOfBots];
+		//botsTargetQueue = new ArrayList<Integer>[NumberOfBots]();
+
+		//prediction------------------------------------------------------------------------------------------		
+		//test Prediction is OK
+		Vector2 a = new Vector2(20, 10);
+		character.updateMyPrediction(a);
+		System.out.println(character.getMyPrediction().getX());
+		//End of prediction------------------------------------------------------------------------------------
+
+				
+		
+		for(int i = 0; i<NumberOfBots ;i ++ ){
+			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+			
+			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
+				botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+			}
+			
+			Bot[i] = new CharacterHuman(
+					this,
+					20,
+					20,
+					originalPoint,
+					botPosition,
+					0,
+					initialVelocity,
+					0,
+					OperK,				
+					initialAccel,
+		
+					0,
+					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
+					backgroundColor,
+					GlobalSetting.numberOfBread,
+					Sys,
+					0
+			);
+		}		
+		
+		
+		currentTargetQueue = new ArrayList<Integer>();
+		
+		//key control
+		upMove = 0;
+		downMove = 0;
+		leftMove = 0;
+		rightMove = 0;
+		
 	}
 	public void keyPressed() {
 		if (keyCode == UP) {
@@ -575,6 +555,11 @@ public class MainProgram extends PApplet{
 			rightMove = 0;
 
 	    }
+		
+		if(keyCode == KeyEvent.VK_SPACE){
+			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
+			InitilizeAll();
+		}
 	}	
 
 }

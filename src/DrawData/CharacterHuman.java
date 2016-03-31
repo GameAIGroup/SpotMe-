@@ -473,7 +473,7 @@ public class CharacterHuman  extends PApplet{
 		minOrientation = Float.POSITIVE_INFINITY;
 		maxAllowedDistance = Float.POSITIVE_INFINITY;
 		
-		for (Node node: G.nodeList)
+		for (Node node: PublicGraph.G.nodeList)
 		{
 			vector = new Vector2(node.coordinate.x, node.coordinate.y);
 			distanceVector = new Vector2((vector.x - this.getPosition().x), (vector.y - this.getPosition().y));
@@ -485,7 +485,7 @@ public class CharacterHuman  extends PApplet{
 			node.distanceFromBot = distance;
 			if ( Math.abs(changeInOr) < (GlobalSetting.maxVisionAngle/2) && distance < 250)
 			{
-				if(!graphGenerator.checkObstacle(vector))
+				if(!PublicGraph.graphGenerator.checkObstacle(vector))
 				{	
 					tempFilteredNodes.add(node);
 				}
