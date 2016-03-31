@@ -350,12 +350,12 @@ public class CharacterHuman  extends PApplet{
 			//if(mousePressed){
 				isSeeking = true;
 				//call path finding
-				currentTarget = new Vector2((float)Math.random()*GlobalSetting.screenWidth, (float)Math.random()*GlobalSetting.screenHeight);
+				currentTarget = new Vector2((float)Math.random()*(GlobalSetting.screenWidth-100)+50, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
 				
 				int targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, currentTarget);
 				
 				while(PublicGraph.graphGenerator.ObsOverlapList.get(targetIndex)== 1){
-					currentTarget = new Vector2((float)Math.random()*GlobalSetting.screenWidth, (float)Math.random()*GlobalSetting.screenHeight);
+					currentTarget = new Vector2((float)Math.random()*(GlobalSetting.screenWidth-100)+50, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
 					targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, currentTarget);
 				}
 				

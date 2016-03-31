@@ -542,6 +542,8 @@ public class MainProgram extends PApplet{
 		if (keyCode == UP) {
 			upMove = upMove-GlobalSetting.keyMoveDistance;
 			//System.out.println("UP: "+upMove);
+			character.updateOrientation(0);
+
 			character.Move(upMove, downMove, leftMove, rightMove);
 			upMove = 0;
 			downMove = 0;
@@ -552,6 +554,8 @@ public class MainProgram extends PApplet{
 	    else if (keyCode == DOWN) {
 			downMove = downMove+GlobalSetting.keyMoveDistance;
 			//System.out.println("Down: "+downMove);
+			character.updateOrientation(PI);
+
 			character.Move(upMove, downMove, leftMove, rightMove);
 			upMove = 0;
 			downMove = 0;
@@ -562,6 +566,8 @@ public class MainProgram extends PApplet{
 	    else if(keyCode == LEFT){
 			leftMove = leftMove-GlobalSetting.keyMoveDistance;
 			//System.out.println("Left: "+leftMove);
+			character.updateOrientation(-PI/2);
+
 			character.Move(upMove, downMove, leftMove, rightMove);
 			upMove = 0;
 			downMove = 0;
@@ -572,6 +578,7 @@ public class MainProgram extends PApplet{
 	    else if(keyCode == RIGHT){
 			rightMove = rightMove+GlobalSetting.keyMoveDistance;
 			//System.out.println("Right: "+rightMove);
+			character.updateOrientation(PI/2);
 			character.Move(upMove, downMove, leftMove, rightMove);
 			upMove = 0;
 			downMove = 0;
