@@ -16,18 +16,30 @@ public class CommonFunction {
 		int resultIndex = 0;
 		float minDistance = 0;
 		float tempDistance = 0;
+		//find non-obstacle point
 		
+		int check = 0;
 		for(int i = 0; i< NodeList.size();i++){
 			tempDistance = OperK.getDisBy2Points(NodeList.get(i).coordinate, Point);
+			if(PublicGraph.graphGenerator.ObsOverlapList.get(i)==0){
+				if(check == 0){
+					minDistance = tempDistance;
+					resultIndex = i;
+					check++;
+				}
+				if(tempDistance < minDistance){
+					minDistance = tempDistance;
+					resultIndex = i;
+				}
+			}
+			else{
+/*
+				if(i <= 700 && i >= 500){
+					System.out.println("avoid obstacle " +i);
+				}
+*/
+			}
 
-			if(i == 0){
-				minDistance = tempDistance;
-				resultIndex = i;
-			}
-			if(tempDistance < minDistance){
-				minDistance = tempDistance;
-				resultIndex = i;
-			}
 		}
 		return resultIndex;
 	}	

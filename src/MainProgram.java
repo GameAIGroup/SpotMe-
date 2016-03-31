@@ -162,9 +162,10 @@ public class MainProgram extends PApplet{
 		Sys = new SystemParameter(5, 5*0.1f, PI/2.0f);
 		// input this operations for each kinematics
 		OperK = new KinematicOperations(this, Sys);
-
-		CF = new CommonFunction(OperK);
 		publicG = new PublicGraph(this, OperK);
+		
+		CF = new CommonFunction(OperK);
+
 		
 		gameDisplay = new GameDisplay(this);
 
@@ -442,7 +443,7 @@ public class MainProgram extends PApplet{
 		PublicGraph.graphGenerator.edgeDraw();
 		//PublicGraph.graphGenerator.displayObstacle();
 		PublicGraph.graphGenerator.displaySafeSpot();
-		//PublicGraph.graphGenerator.nodeDisplay(this);
+		PublicGraph.graphGenerator.nodeDisplay(this);
 		GameDisplay.displayLives();
 		GameDisplay.displayHealth();
 
