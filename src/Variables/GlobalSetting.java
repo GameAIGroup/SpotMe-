@@ -54,7 +54,7 @@ public class GlobalSetting {
 		predictions = new Predictions(numberOfbots);
 		//End of prediction------------------------------------------------------------------------------------
 		
-		keyMoveDistance = 10;
+		keyMoveDistance = 5;
 		
 		sizeOfSafeSpot = 50;
 		numberOfSafeSpot = 5;
