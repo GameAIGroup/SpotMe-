@@ -219,7 +219,10 @@ public class MainProgram extends PApplet{
 	{
 		for (Node node: nodes)
 		{
+			pushMatrix();
+			fill(240, 255, 125);
 			ellipse(node.coordinate.x, node.coordinate.y, (float)10, (float)10);
+			popMatrix();
 		}
 	}
 /*
@@ -480,7 +483,7 @@ public class MainProgram extends PApplet{
 			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
 			
 			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
-				botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+				botPosition = new Vector2((float)Math.random()*(windowWidth-100)+50 , (float)Math.random()*(windowHeight-100)+50);
 			}
 			
 			Bot[i] = new CharacterHuman(

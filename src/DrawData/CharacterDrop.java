@@ -278,9 +278,9 @@ public class CharacterDrop {
 				//System.out.println(breadQueue.get(i).getOrientation());
 				//System.out.println(breadQueue.get(i).getPosition().getX() +", "+ breadQueue.get(i).getPosition().getY());
 				updateShapeColor(
-					shapeColor.getR()+(backgroundColor.getR() - shapeColor.getR())* ( breadQueue.size() - i)/ breadNumber,
-					shapeColor.getG()+(backgroundColor.getG() - shapeColor.getG())* ( breadQueue.size() - i)/ breadNumber,
-					shapeColor.getB()+(backgroundColor.getB() - shapeColor.getB())* ( breadQueue.size() - i)/ breadNumber,
+					shapeColor.getR()+(backgroundColor.getR() - shapeColor.getR())* ( breadQueue.size() - i-1)/ breadNumber,
+					shapeColor.getG()+(backgroundColor.getG() - shapeColor.getG())* ( breadQueue.size() - i-1)/ breadNumber,
+					shapeColor.getB()+(backgroundColor.getB() - shapeColor.getB())* ( breadQueue.size() - i-1)/ breadNumber,
 					i
 				);
 				//display
@@ -436,72 +436,9 @@ public class CharacterDrop {
 				getPosition().getY()+normalizeKeyMove((float)upMove)+normalizeKeyMove((float)downMove)
 		);
 		
-		if(isSeeking == false){
-			//if(mousePressed){
-				isSeeking = true;
-				//call path finding
-				//currentTarget = new Vector2((float)Math.random()*GlobalSetting.screenWidth, (float)Math.random()*GlobalSetting.screenHeight);
-				currentTarget = target;
-				int targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, currentTarget);
-			
-				int closestIndex = CommonFunction.findClose(PublicGraph.G.nodeList, getK().getPosition());
-				
-				//System.out.println(targetIndex+ ", " + closestIndex);
-				H2 h1 = new H2(PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex, operK);
-				
-				A1 = new AStar(h1, PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex);
+		int targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, target);
+		updatePosition(PublicGraph.G.nodeList.get(targetIndex).coordinate);
 
-				while(A1.openList.size()>0){
-					A1.computeAStar(PublicGraph.G.nodeList, PublicGraph.G.edgeList);
-					//System.out.println("-----------");
-				}
-				if(A1.isFind == false){
-					//System.out.println("Didn't find!!");
-				}
-				else{
-/*
-					System.out.print("\r\nAStar with H1 Path: ");
-					for(int i = 0 ;i < A1.result.size(); i++){
-						System.out.print(" " + A1.result.get(i)+" ");
-					}
-*/
-				}
-				//System.out.println("");
-				targetQueue.clear();
-				targetQueue.addAll(A1.result);
-		}
-		
-		//Gathering dots
-		
-		//make decisions in 0.02 sec frequency
-		//make one decision
-
-		if(isSeeking == true){
-			if(targetQueue.size()>0){
-
-				//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
-	
-				if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate, getK().getPosition())>5){
-					//System.out.println("Current Target = " + targetQueue.get(0));
-					currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
-				}
-				else{
-					targetQueue.remove(0);
-				}
-				//currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
-				//targetQueue.remove(0);
-				tempResult = Seek.computeSeek(currentTarget);
-				//System.out.println(tempResult.getK().getPosition().x + ", "+tempResult.getK().getPosition().y);
-				setK(tempResult.getK());
-				setS(tempResult.getS());
-
-			}
-			else{
-				isSeeking = false;
-				
-			}
-			
-		}		
 		//updatePosition(target);
 		
 	}
