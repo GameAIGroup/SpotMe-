@@ -1,5 +1,7 @@
 package Variables;
 
+import BasicStructures.Vector2;
+
 public class GlobalSetting {
 	public static int screenWidth;
 	public static int screenHeight;
@@ -29,6 +31,7 @@ public class GlobalSetting {
 	
 	//prediction------------------------------------------------------------------------------------------
 	public static Predictions predictions;
+	public static Vector2[] pastPosition;
 	//End of prediction------------------------------------------------------------------------------------
 	
 	public static int LevelControl;
@@ -40,18 +43,22 @@ public class GlobalSetting {
 		
 		HeuristicMode = 1;
 
-		numberOfBread = 1;
+		numberOfBread = 10;
 		
 		tileNumber = 50;
 		nodeSize = 5;
 		obstacleMargin = 3;
 		
-		numberOfbots = 3;
+		numberOfbots = 2;
 		wanderTimeBound = 5;
 		
 		
 		//prediction------------------------------------------------------------------------------------------
 		predictions = new Predictions(numberOfbots);
+		pastPosition = new Vector2[numberOfbots];
+		for(int i = 0 ; i< numberOfbots; i++){
+			pastPosition[i] = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+ 		}
 		//End of prediction------------------------------------------------------------------------------------
 		
 		keyMoveDistance = 5;

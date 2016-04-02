@@ -55,4 +55,33 @@ public class Pursue {
 		
 		return Result;
 	}
+	public Vector2 makeUnitTimePrediction(Vector2 targetPastPosition, Vector2 targetCurrentPosition, Vector2 selfCurrentPosition){
+		Vector2 Result = new Vector2( 0, 0 );
+		//suppose time difference is 1 time unit.
+		//System.out.println("input: ("+selfCurrentPosition.x+", "+selfCurrentPosition.y+") ("+targetPastPosition.x+", "+targetPastPosition.y+")("+targetCurrentPosition.x+", "+targetCurrentPosition.y+")");
+		
+		if(targetPastPosition.x < 0 &&targetPastPosition.y < 0){
+			// no past position
+			Result  = targetCurrentPosition;
+		}
+		else{
+		
+			Vector2 estimatedVelocity = new Vector2(targetCurrentPosition.x - targetPastPosition.x, targetCurrentPosition.y - targetPastPosition.y);
+			float targetMaxVelocity = operK.getLengthByVector2(estimatedVelocity);
+			//System.out.println("guessV: ("+estimatedVelocity.x+", "+estimatedVelocity.y+")");
+			
+			//float currentDistance =  operK.getDisBy2Points(targetCurrentPosition, selfCurrentPosition);
+			//System.out.println("currentDis: ("+currentDistance+")");
+			
+			//assume pursue in maxSpeed
+			
+			Vector2 newTargetPosition;
+	
+			float tempTime = 1.0f;
+			newTargetPosition = new Vector2(estimatedVelocity.x*tempTime+targetCurrentPosition.x, estimatedVelocity.y*tempTime+targetCurrentPosition.y);
+			// timeDiff is the needed time to reach prediction position
+			Result = newTargetPosition;
+		}
+		return Result;
+	}	
 }

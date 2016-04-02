@@ -97,7 +97,8 @@ public class MainProgram extends PApplet{
 	private int windowHeight;
 
 	private KinematicOperations OperK;
-	private TimeControler decisionTimer;
+	private TimeControler botDecisionTimer;
+	private TimeControler playerDecisionTimer;
 	private TimeControler breadTimer;
 	
 	//Setting for environment
@@ -205,8 +206,11 @@ public class MainProgram extends PApplet{
 		originalPoint = new Vector2(0, 0);
 
 		//the decision rate
-		decisionTimer = new TimeControler();
-		decisionTimer.initialTimer();
+		botDecisionTimer = new TimeControler();
+		botDecisionTimer.initialTimer();
+		playerDecisionTimer = new TimeControler();
+		playerDecisionTimer.initialTimer();
+
 		// the time slat for record breadcrumbs
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
@@ -224,7 +228,7 @@ public class MainProgram extends PApplet{
 		{
 			pushMatrix();
 			fill(240, 255, 125);
-			ellipse(node.coordinate.x, node.coordinate.y, (float)10, (float)10);
+			ellipse(node.coordinate.x, node.coordinate.y, (float)5, (float)5);
 			popMatrix();
 		}
 	}
@@ -270,100 +274,207 @@ public class MainProgram extends PApplet{
 		}
 		
 
-		//================Decision Tree=================================================================================
+		//Gathering dots
+		if(playerDecisionTimer.checkTimeSlot(200)){
+			//For testing safe spots
+			character.Move(upMove, downMove, leftMove, rightMove);
+			upMove = 0;
+			downMove = 0;
+			leftMove = 0;
+			rightMove = 0;
+		}
 		
-		boolean checkPlayer = false;
-		boolean inShootingRange = false;
-		boolean isCloset = false;
-		boolean haveWeapon  = false;
-		boolean inSafeSpot = false;
-		boolean receiveRequest  = false; //when to switch back to no receive?
-		int[] otherbots;//
-		//--------------
-		otherbots = new int[NumberOfBots];
+		boolean[] checkPlayer;
+		checkPlayer = new boolean[NumberOfBots];
 		
+		for(int botIter = 0; botIter < NumberOfBots; botIter++){
+			checkPlayer[botIter] = false;
+			botVision = Bot[botIter].getVisionRangeNodes(G, OperK, graphGenerator, character); 
+			checkPlayer[botIter] = botVision.isCharacterInVision(character, Bot[botIter], OperK);
+			
+			if(checkPlayer[botIter] == true){
+				pushMatrix();
+				fill(240, 255, 125, 125);
+				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
+				popMatrix();
+			}
+		}
+
 		
-		if(Bot[1].checkSeekMode() == true){
-			if ( checkPlayer == true){
-				//1. seek mode- purse
-				Bot[1].isSeekMode();
-				//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-				//ask for other wander bots to support
-				for (int i = 0; i < otherbots.length ; i++){
-					if ( Bot[i].checkSeekMode() == false){
-						Bot[i].receiveRequest();
-						//use this bot's prediction
-						Bot[i].updateMyPrediction(Bot[1].givePrediction()); 
+		//make decisions in 0.02 sec frequency
+		if(botDecisionTimer.checkTimeSlot(1000)){
+			//bot decision cycle
+			count = (count +1)%200;
+			//For testing safe spots
+			int[] otherbots;//
+			//--------------
+			otherbots = new int[NumberOfBots];
+			
+			CommonFunction.activateSafeSpot(count, 0, 100);
+			for(int botIter = 0 ; botIter < NumberOfBots; botIter++){
+
+				//Bot[botIter].Wander();
+				//put decision tree in here, since there is not multi-thread
+				
+
+				//================Decision Tree=================================================================================
+
+				boolean inShootingRange = false;
+				boolean isCloset = false;
+				boolean haveWeapon  = false;
+				boolean inSafeSpot = false;
+				boolean receiveRequest  = false; //when to switch back to no receive?
+				
+				// when bot is seeking
+				if(Bot[botIter].checkSeekMode() == true){
+					if ( checkPlayer[botIter] == true){
+						//System.out.println("System: bot "+botIter+" is seeking and sees the player right now!");
+						//1. seek mode- purse
+						Bot[botIter].isSeekMode();
+						Vector2 myprediction = pursue.makeUnitTimePrediction(GlobalSetting.pastPosition[botIter], character.getPosition(), Bot[botIter].getPosition());
+						GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+						System.out.println("player now in ("+ character.getPosition().x+", "+character.getPosition().y+")");
+						System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
+						//Seek the prediction
+						Bot[botIter].Seek(myprediction);
+						
+/*
+						//ask for other wander bots to support
+						for (int i = 0; i < otherbots.length ; i++){
+							if ( Bot[i].checkSeekMode() == false){
+								Bot[i].receiveRequest();
+								//use this bot's prediction
+								Bot[i].updateMyPrediction(Bot[1].givePrediction()); 
+							}
+						}
+*/
+						
+						//2. is in shooting range
+						if( inShootingRange == true ){
+							
+							if( isCloset == true ){
+							
+								if( haveWeapon == true){
+									//shoot();
+								}
+								else{//don't have weapon
+									//requestWeapon();
+								}
+							}
+							else{//not the closest
+								Bot[botIter].isSeekMode();
+								//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
+							}
+								
+						}
+						else{//not in shooting range
+							Bot[botIter].isSeekMode();
+							//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
+						}
+					}
+					else{//no player around
+						if( inSafeSpot == true ){
+							//wander;
+							Bot[botIter].isWanderMode();
+						}
+						else{//go to prediction from other bots
+							Bot[botIter].isSeekMode();
+							Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+							int checkPredictionIter = 0;
+							while(checkPredictionIter < NumberOfBots){
+								if(checkPredictionIter != botIter){
+									// use other's prediction
+									if(GlobalSetting.predictions.getMyPrediction(checkPredictionIter).x >= 0 &&GlobalSetting.predictions.getMyPrediction(checkPredictionIter).y >= 0){
+										//some one have prediction, use it
+										myprediction = GlobalSetting.predictions.getMyPrediction(checkPredictionIter);
+										GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+										//also use others' recorded past position
+										GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
+										//System.out.println("Bot " + botIter + " Get prediction from bot" + checkPredictionIter +" , ("+myprediction.x +", "+myprediction.y+")");
+										break;
+									}
+								}
+								checkPredictionIter++;
+							}
+							Bot[botIter].Seek(myprediction);
+							//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
+						}
+					}
+				}
+				else{
+					//wandering Mode
+					Bot[botIter].Wander();
+					//Bot[botIter].Seek(new Vector2(100, 100));
+					if ( checkPlayer[botIter] == true){
+						System.out.println("System: bot "+botIter+" sees the player right now!");
+						Bot[botIter].isSeekMode();
+						//no past position
+						Vector2 myprediction = pursue.makeUnitTimePrediction(new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), character.getPosition(), Bot[botIter].getPosition());
+						GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+						//save past position
+						GlobalSetting.pastPosition[botIter] = character.getPosition();
+						System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
+						//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());			
+					}
+					else{//no player around
+						//if ( character.checkRequest() == true ){
+							//System.out.println("bot "+botIter+ " didn't see player");
+							Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+							int checkPredictionIter = 0;
+							while(checkPredictionIter < NumberOfBots){
+								if(checkPredictionIter != botIter){
+									// use other's prediction
+									if(GlobalSetting.predictions.getMyPrediction(checkPredictionIter).x >= 0 &&GlobalSetting.predictions.getMyPrediction(checkPredictionIter).y >= 0){
+										//some one have prediction, use it
+										myprediction = GlobalSetting.predictions.getMyPrediction(checkPredictionIter);
+										GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+										//also use others' recorded past position
+										GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
+										//System.out.println("Bot " + botIter + " Get prediction from bot" + checkPredictionIter +" , ("+myprediction.x +", "+myprediction.y+")");
+										break;
+									}
+								}
+								checkPredictionIter++;
+							}
+							
+							if(myprediction.x >=0 && myprediction.y >= 0){
+								// prediction updated by other's data
+								Bot[botIter].isSeekMode();
+							}
+							else{
+								Bot[botIter].isWanderMode();
+							}
+							
+							//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+							//---Seek.updateTargetPosition(Bot[1].getMyPrediction());	
+						//}
+						//else{
+							//keep wandering
+						//}
 					}
 				}
 				
-				//2. is in shooting range
-				if( inShootingRange == true ){
-					
-					if( isCloset == true ){
-					
-						if( haveWeapon == true){
-							//shoot();
-						}
-						else{//don't have weapon
-							//requestWeapon();
-						}
+				//================End of Decision Tree=================================================================================
+				
+				
+				
+				/*
+				if (botVision.isCharacterInVision(character, Bot[i], OperK))
+				{
+					pushMatrix();
+					fill(240, 255, 125, 125);
+					ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
+					popMatrix();
+					// if find player, reduce health points.
+					GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-GlobalSetting.deductionPerShot)%GlobalSetting.characterMaxHealth;
+					if (GlobalSetting.characterHealthPoints <= 0)
+					{
+						isGameOver = true;
 					}
-					else{//not the closest
-						Bot[1].isSeekMode();
-						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
-					}
-						
 				}
-				else{//not in shooting range
-					Bot[1].isSeekMode();
-					//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
-				}
-			}
-			else{//no player around
-				if( inSafeSpot == true ){
-					//wander;
-					Bot[1].isWanderMode();
-				}
-				else{//go to prediction from other bots
-					Bot[1].isSeekMode();
-					//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
-				}
-			}
-		}
-		else{
-			//wandering Mode
-			if ( checkPlayer == true){
-				Bot[1].isSeekMode();
-				//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-				//---Seek.updateTargetPosition(Bot[1].getMyPrediction());			
-			}
-			else{//no player around
-				if ( character.checkRequest() == true ){
-					Bot[1].isSeekMode();
-					//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-					//---Seek.updateTargetPosition(Bot[1].getMyPrediction());	
-				}
-				else{
-					//keep wandering
-					Bot[1].isWanderMode();
-				}
-			}
-		}
-		
-		//================End of Decision Tree=================================================================================
-		
+				*/
 
-		//Gathering dots
-		
-		//make decisions in 0.02 sec frequency
-		if(decisionTimer.checkTimeSlot(20)){
-			count = (count +1)%200;
-			//For testing safe spots
-			CommonFunction.activateSafeSpot(count, 0, 100);
-			
-			for(int i = 0 ; i < NumberOfBots; i++){
-				Bot[i].Wander();
 			}
 		}
 
@@ -371,39 +482,30 @@ public class MainProgram extends PApplet{
 		//record
 		if(breadTimer.checkTimeSlot(200)){
 			character.updateBreadQueue(character.getPosition(), character.getOrientation());
+
 			for(int i = 0; i < NumberOfBots; i++){
 				Bot[i].updateBreadQueue(Bot[i].getPosition(), Bot[i].getOrientation());
+
 			}
 		}
 		//display		
-		GameDisplay.displayLives();
-		
-		PublicGraph.graphGenerator.edgeDraw();
+		//PublicGraph.graphGenerator.edgeDraw();
 		//PublicGraph.graphGenerator.displayObstacle();
-		//PublicGraph.graphGenerator.displaySafeSpot();
+		PublicGraph.graphGenerator.displaySafeSpot();
 		//PublicGraph.graphGenerator.nodeDisplay(this);
-		GameDisplay.displayLives();
-		GameDisplay.displayHealth();
 
 		//mapCreate.nodeDisplay(this);
 		character.display();
 		for(int i = 0; i < NumberOfBots; i++){
-			Bot[i].display();
+			HighlightNodes(Bot[i].getVisionRangeNodes(G, OperK, graphGenerator, character).visionNodes);
 		}
 		
 		for(int i = 0; i < NumberOfBots; i++){
-			botVision = Bot[i].getVisionRangeNodes(G, OperK, graphGenerator, character); 
-			HighlightNodes(botVision.visionNodes);
-			if (botVision.isCharacterInVision(character, Bot[i], OperK))
-			{
-				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
-				GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-GlobalSetting.deductionPerShot)%GlobalSetting.characterMaxHealth;
-				if (GlobalSetting.characterHealthPoints <= 0)
-				{
-					isGameOver = true;
-				}
-			}
+			Bot[i].display();
 		}
+		GameDisplay.displayLives();
+		GameDisplay.displayHealth();
+
 	}
 	
 /*
@@ -451,7 +553,7 @@ public class MainProgram extends PApplet{
 
 	
 		//Seek for test 
-	
+		pursue = new Pursue(OperK, Sys);
 		
 		//set character
 		character = new CharacterDrop(
@@ -493,20 +595,22 @@ public class MainProgram extends PApplet{
 
 		//prediction------------------------------------------------------------------------------------------		
 		//test Prediction is OK
-		Vector2 a = new Vector2(20, 10);
-		character.updateMyPrediction(a);
-		System.out.println(character.getMyPrediction().getX());
+		//Vector2 a = new Vector2(20, 10);
+		//character.updateMyPrediction(a);
+		//System.out.println(character.getMyPrediction().getX());
 		//End of prediction------------------------------------------------------------------------------------
 
 				
 		
 		for(int i = 0; i<NumberOfBots ;i ++ ){
-			Vector2 botPosition = new Vector2((float)Math.random()*windowWidth, (float)Math.random()*windowHeight);
+			Vector2 botPosition = new Vector2((float)Math.random()*(windowWidth-100)+50 , (float)Math.random()*(windowHeight-100)+50);
+			botPosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, botPosition)).coordinate;
 			
+/*
 			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
-				botPosition = new Vector2((float)Math.random()*(windowWidth-100)+50 , (float)Math.random()*(windowHeight-100)+50);
+				botPosition = new Vector2((float)Math.random()*(windowWidth-00)+50 , (float)Math.random()*(windowHeight-100)+50);
 			}
-			
+*/			
 			Bot[i] = new CharacterHuman(
 					this,
 					20,
@@ -520,7 +624,8 @@ public class MainProgram extends PApplet{
 					initialAccel,
 		
 					0,
-					new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
+					//new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
+					new ColorVectorRGB((float)255*(i%2), (float)255*(i%2), (float)255*(i%2)),
 					backgroundColor,
 					GlobalSetting.numberOfBread,
 					Sys,
@@ -544,11 +649,7 @@ public class MainProgram extends PApplet{
 			//System.out.println("UP: "+upMove);
 			character.updateOrientation(0);
 
-			character.Move(upMove, downMove, leftMove, rightMove);
-			upMove = 0;
-			downMove = 0;
-			leftMove = 0;
-			rightMove = 0;
+			//character.Move(upMove, downMove, leftMove, rightMove);
 
 		} 
 	    else if (keyCode == DOWN) {
@@ -556,11 +657,11 @@ public class MainProgram extends PApplet{
 			//System.out.println("Down: "+downMove);
 			character.updateOrientation(PI);
 
-			character.Move(upMove, downMove, leftMove, rightMove);
-			upMove = 0;
-			downMove = 0;
-			leftMove = 0;
-			rightMove = 0;
+			//character.Move(upMove, downMove, leftMove, rightMove);
+			//upMove = 0;
+			//downMove = 0;
+			//leftMove = 0;
+			//rightMove = 0;
 
 	    }
 	    else if(keyCode == LEFT){
@@ -568,22 +669,22 @@ public class MainProgram extends PApplet{
 			//System.out.println("Left: "+leftMove);
 			character.updateOrientation(-PI/2);
 
-			character.Move(upMove, downMove, leftMove, rightMove);
-			upMove = 0;
-			downMove = 0;
-			leftMove = 0;
-			rightMove = 0;
+			//character.Move(upMove, downMove, leftMove, rightMove);
+			//upMove = 0;
+			//downMove = 0;
+			//leftMove = 0;
+			//rightMove = 0;
 
 	    }
 	    else if(keyCode == RIGHT){
 			rightMove = rightMove+GlobalSetting.keyMoveDistance;
 			//System.out.println("Right: "+rightMove);
 			character.updateOrientation(PI/2);
-			character.Move(upMove, downMove, leftMove, rightMove);
-			upMove = 0;
-			downMove = 0;
-			leftMove = 0;
-			rightMove = 0;
+			//character.Move(upMove, downMove, leftMove, rightMove);
+			//upMove = 0;
+			//downMove = 0;
+			//leftMove = 0;
+			//rightMove = 0;
 
 	    }
 		

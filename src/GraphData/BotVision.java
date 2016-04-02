@@ -6,6 +6,7 @@ import BasicStructures.Vector2;
 import DrawData.CharacterDrop;
 import DrawData.CharacterHuman;
 import MovementStructures.KinematicOperations;
+import Variables.GlobalSetting;
 
 public class BotVision {
 	public List<Node> visionNodes;
@@ -24,7 +25,7 @@ public class BotVision {
 	{
 		boolean characterInVision = false;
 		
-		/*Vector2 distanceVector = new Vector2((character.getPosition().x - bot.getPosition().x), (character.getPosition().y - bot.getPosition().y));
+		Vector2 distanceVector = new Vector2((character.getPosition().x - bot.getPosition().x), (character.getPosition().y - bot.getPosition().y));
 		float currentOr = bot.getOrientation();
 		float resultantOr = OperK.getOrientationByV(currentOr, distanceVector);
 		float changeInOr = bot.getChangeInOrientation(resultantOr, currentOr);
@@ -36,15 +37,23 @@ public class BotVision {
 			{
 				characterInVision = true;
 			}
-		}*/
+		}
 		
 		for (Node node: visionNodes)
 		{
-			if ((character.getPosition().x == node.coordinate.x) && (character.getPosition().y == node.coordinate.y))
+
+ 			if ((character.getPosition().x == node.coordinate.x) && (character.getPosition().y == node.coordinate.y))
 			{
 				characterInVision = true;
 				break;
 			}
+
+/*
+			if (OperK.getDisBy2Points(character.getPosition(), node.coordinate)<OperK.getLengthByVector2(new Vector2((float)GlobalSetting.screenWidth/GlobalSetting.tileNumber,(float)GlobalSetting.screenHeight/GlobalSetting.tileNumber))){
+				characterInVision = true;
+				break;
+			}
+*/
 		}
 		return characterInVision;
 	}
