@@ -591,6 +591,7 @@ public class CharacterHuman  extends PApplet{
 		
 		return changeInOr;
 	}
+	
 	public float getChangeInOrientation2(float or1, float or2)
 	{
 		float changeInOr;
@@ -632,7 +633,8 @@ public class CharacterHuman  extends PApplet{
 			node.distanceFromBot = distance;
 			if ( Math.abs(changeInOr) < (GlobalSetting.maxVisionAngle/2) && distance < 250)
 			{
-				if(!PublicGraph.graphGenerator.checkObstacle(vector))
+				if(!PublicGraph.graphGenerator.checkObstacle(vector) &&
+						!PublicGraph.graphGenerator.checkSafeSpots(vector))
 				{	
 					tempFilteredNodes.add(node);
 				}
