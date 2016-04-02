@@ -37,6 +37,9 @@ public class GlobalSetting {
 	public static int LevelControl;
 	public static int LevelNumber; 
 	
+	public static boolean playerAIEnable;
+	public static int characterRadius;
+	
 	public GlobalSetting(){
 		screenWidth = 800;
 		screenHeight = 600;
@@ -80,6 +83,8 @@ public class GlobalSetting {
 		obstacleMargin = 3;
 
 		maxVisionAngle = 0.3;
+		
+		playerAIEnable = true;
 
 	}
 }

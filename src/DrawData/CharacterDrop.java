@@ -337,6 +337,89 @@ public class CharacterDrop {
 		}
 
 	}
+	
+	public void Seek(Vector2 target){
+		currentTarget = target;
+		int targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, currentTarget);
+		
+		int closestIndex = CommonFunction.findClose(PublicGraph.G.nodeList, getK().getPosition());
+
+		//System.out.println(targetIndex+ ", " + closestIndex);
+		H2 h1 = new H2(PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex, operK);
+		
+		A1 = new AStar(h1, PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex);
+
+		while(A1.openList.size()>0){
+			A1.computeAStar(PublicGraph.G.nodeList, PublicGraph.G.edgeList);
+			//System.out.println("-----------");
+		}
+		if(A1.isFind == false){
+			System.out.println("Didn't find!!");
+		}
+		//System.out.println("");
+		targetQueue.clear();
+		targetQueue.addAll(A1.result);
+		//remove self
+		targetQueue.remove(0);
+
+		if(targetQueue.size()>0){
+
+			//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
+			if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate, getK().getPosition())>5){
+				//System.out.println("Current Target = " + targetQueue.get(0));
+				currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
+				//System.out.println("----Seek ("+ targetQueue.get(0)+ ") ");
+			}
+			else{
+				targetQueue.remove(0);
+			}
+			//currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
+			//System.out.println("----Seek ("+ targetQueue.get(0)+ ") ");
+
+			//targetQueue.remove(0);
+			tempResult = Seek.computeSeek(currentTarget);
+			
+			setK(tempResult.getK());
+			setS(tempResult.getS());
+			//updatePosition(currentTarget);
+		}
+	}
+	
+	public Vector2 getSeekPosition(CharacterHuman[] Bots, KinematicOperations Operk)
+	{
+		Vector2 seekposition;
+		int numberOfBots = Bots.length;
+		CharacterHuman nearestBot = null;
+		Vector2 distanceVector;
+		double distance, nearestDistance;
+		nearestDistance = Double.POSITIVE_INFINITY;
+		
+		for (int i=0; i< numberOfBots; i++)
+		{
+			distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
+			if (distance < 100)
+			{
+				if (distance < nearestDistance)
+				{
+					nearestBot = Bots[i];
+					nearestDistance = distance;
+				}
+			}
+		}
+		
+		if (nearestDistance < 100)
+		{
+			distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
+			distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
+			seekposition = new Vector2(distanceVector.x + this.getPosition().x, distanceVector.y + this.getPosition().y);
+		}
+		else
+		{
+			seekposition = new Vector2(631, 19);
+		}
+		return seekposition;
+	}
+
 	public void Wander(){
 
 

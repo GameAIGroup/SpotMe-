@@ -111,6 +111,7 @@ public class MainProgram extends PApplet{
 	private List<Integer>[] botsTargetQueue;
 	
 	private Vector2 originalPoint;
+	private Vector2 characterSeekPosition;
 	
 	//Seek function
 	//private Seek Seek;
@@ -235,7 +236,8 @@ public class MainProgram extends PApplet{
 	
 	public void checkWinningCondition()
 	{
-		if ((character.getPosition().x > 500) && (character.getPosition().y < 20))
+		System.out.println(character.getPosition().x+ ", " +character.getPosition().y);
+		if ((character.getPosition().x > 620) && (character.getPosition().y < 22))
 		{
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
 			InitilizeAll();
@@ -257,6 +259,12 @@ public class MainProgram extends PApplet{
 		{
 			image(gameOver,width/4, height/4, width/2, height/2);
 			return;
+		}
+		
+		if (GlobalSetting.playerAIEnable && playerDecisionTimer.checkTimeSlot(50))
+		{
+			characterSeekPosition = character.getSeekPosition(Bot, OperK);
+			character.Seek(characterSeekPosition);
 		}
 		
 		checkWinningCondition();
@@ -562,6 +570,8 @@ public class MainProgram extends PApplet{
 		PublicGraph.mapCreate.markObstacles(new Vector2(mouseX, mouseY));
 	}
 	public void InitilizeAll(){
+		
+		characterSeekPosition = new Vector2(631, 19);
 		GlobalSetting.characterHealthPoints = GlobalSetting.characterMaxHealth;
 		//setLevel = true;
 		PublicGraph.mapCreate.readObstacle(this, GlobalSetting.LevelControl+1);
