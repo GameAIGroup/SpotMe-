@@ -298,11 +298,189 @@ public class MainProgram extends PApplet{
 				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
 				popMatrix();
 			}
+
+			//================Decision Tree=================================================================================
+
+			boolean inShootingRange = false;
+			boolean isCloset = false;
+			boolean haveWeapon  = false;
+			boolean inSafeSpot = false;
+			boolean receiveRequest  = false; //when to switch back to no receive?
+			
+			// when bot is seeking
+			if(Bot[botIter].checkSeekMode() == true){
+				if ( checkPlayer[botIter] == true){
+					System.out.println("System: bot "+botIter+" is seeking and sees the player right now!");
+					//1. seek mode- purse
+					Bot[botIter].isSeekMode();
+					Vector2 myprediction = pursue.makeUnitTimePrediction(GlobalSetting.pastPosition[botIter], character.getPosition(), Bot[botIter].getPosition());
+					GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+					System.out.println("player now in ("+ character.getPosition().x+", "+character.getPosition().y+")");
+					System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
+					//Seek the prediction
+					for(int requestIter = 0 ; requestIter < NumberOfBots; requestIter ++){
+						System.out.println("bot "+botIter+ " update bot "+requestIter+" prediction");
+						Bot[requestIter].isSeekMode();
+						GlobalSetting.predictions.setMyPrediction(requestIter, myprediction);
+					}
+					//Bot[botIter].Seek(myprediction);
+					
+/*
+					//ask for other wander bots to support
+					for (int i = 0; i < otherbots.length ; i++){
+						if ( Bot[i].checkSeekMode() == false){
+							Bot[i].receiveRequest();
+							//use this bot's prediction
+							Bot[i].updateMyPrediction(Bot[1].givePrediction()); 
+						}
+					}
+*/
+					
+					//2. is in shooting range
+					if( inShootingRange == true ){
+						
+						if( isCloset == true ){
+						
+							if( haveWeapon == true){
+								//shoot();
+							}
+							else{//don't have weapon
+								//requestWeapon();
+							}
+						}
+						else{//not the closest
+							Bot[botIter].isSeekMode();
+							//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
+						}
+							
+					}
+					else{//not in shooting range
+						Bot[botIter].isSeekMode();
+						//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
+					}
+					
+				}
+				else{//no player around
+					if( inSafeSpot == true ){
+						//wander;
+						Bot[botIter].isWanderMode();
+					}
+					else{//go to prediction from other bots
+						Bot[botIter].isSeekMode();
+						System.out.println("bot "+ botIter+ " is seeking, but have not target");
+						
+						Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+						int checkPredictionIter = 0;
+						
+						//if there is new prediction
+						while(checkPredictionIter < NumberOfBots){
+							if(checkPredictionIter != botIter){
+								// use other's prediction
+								if(GlobalSetting.predictions.getMyPrediction(checkPredictionIter).x >= 0 &&GlobalSetting.predictions.getMyPrediction(checkPredictionIter).y >= 0){
+									//some one have prediction, use it
+									myprediction = GlobalSetting.predictions.getMyPrediction(checkPredictionIter);
+									GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+									//also use others' recorded past position
+									GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
+									System.out.println("Bot " + botIter + " Get prediction from bot" + checkPredictionIter +" , ("+myprediction.x +", "+myprediction.y+")");
+									break;
+								}
+							}
+							checkPredictionIter++;
+						}
+						
+						if(OperK.getDisBy2Points(Bot[botIter].getPosition(), myprediction)<5){
+							Bot[botIter].isWanderMode();
+							Bot[botIter].Wander();
+						}
+						else{
+							Bot[botIter].isSeekMode();
+						}
+						
+						
+						if(myprediction.x <= 0 && myprediction.y <= 0){
+							//no one have prediction
+							Bot[botIter].isWanderMode();
+							Bot[botIter].Wander();
+						}
+						else{
+							Bot[botIter].isSeekMode();
+							GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+							//Bot[botIter].Seek(myprediction);
+						}
+						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
+					}
+				}
+			}
+			else{
+				//wandering Mode
+				//Bot[botIter].Wander();
+				//Bot[botIter].Seek(new Vector2(100, 100));
+				if ( checkPlayer[botIter] == true){
+					System.out.println("System: bot "+botIter+" sees the player right now!");
+					Bot[botIter].isSeekMode();
+					//no past position
+					Vector2 myprediction = pursue.makeUnitTimePrediction(new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), character.getPosition(), Bot[botIter].getPosition());
+					GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+					//save past position
+					GlobalSetting.pastPosition[botIter] = character.getPosition();
+					System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
+					//send request to other bots
+					for(int requestIter = 0 ; requestIter < NumberOfBots; requestIter ++){
+						System.out.println("bot "+botIter+ " request bot "+requestIter+" join seek");
+						Bot[requestIter].isSeekMode();
+						GlobalSetting.predictions.setMyPrediction(requestIter, myprediction);
+					}
+					
+					
+					//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+					//---Seek.updateTargetPosition(Bot[1].getMyPrediction());			
+				}
+				else{//no player around
+					//if ( character.checkRequest() == true ){
+						System.out.println("bot "+botIter+ " didn't see player");
+						Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+/*
+						int checkPredictionIter = 0;
+						while(checkPredictionIter < NumberOfBots){
+							if(checkPredictionIter != botIter){
+								// use other's prediction
+								if(GlobalSetting.predictions.getMyPrediction(checkPredictionIter).x >= 0 &&GlobalSetting.predictions.getMyPrediction(checkPredictionIter).y >= 0){
+									//some one have prediction, use it
+									myprediction = GlobalSetting.predictions.getMyPrediction(checkPredictionIter);
+									GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+									//also use others' recorded past position
+									GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
+									System.out.println("Bot " + botIter + " Get prediction from bot" + checkPredictionIter +" , ("+myprediction.x +", "+myprediction.y+")");
+									break;
+								}
+							}
+							checkPredictionIter++;
+						}
+*/						
+						if(myprediction.x >=0 && myprediction.y >= 0){
+							// prediction updated by other's data
+							Bot[botIter].isSeekMode();
+						}
+						else{
+							Bot[botIter].isWanderMode();
+						}
+						
+						//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
+						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());	
+					//}
+					//else{
+						//keep wandering
+					//}
+				}
+			}
+			
+			//================End of Decision Tree=================================================================================
 		}
 
 		
 		//make decisions in 0.02 sec frequency
-		if(botDecisionTimer.checkTimeSlot(1000)){
+		if(botDecisionTimer.checkTimeSlot(100)){
 			//bot decision cycle
 			count = (count +1)%200;
 			//For testing safe spots
@@ -316,165 +494,13 @@ public class MainProgram extends PApplet{
 				//Bot[botIter].Wander();
 				//put decision tree in here, since there is not multi-thread
 				
-
-				//================Decision Tree=================================================================================
-
-				boolean inShootingRange = false;
-				boolean isCloset = false;
-				boolean haveWeapon  = false;
-				boolean inSafeSpot = false;
-				boolean receiveRequest  = false; //when to switch back to no receive?
-				
-				// when bot is seeking
-				if(Bot[botIter].checkSeekMode() == true){
-					if ( checkPlayer[botIter] == true){
-						//System.out.println("System: bot "+botIter+" is seeking and sees the player right now!");
-						//1. seek mode- purse
-						Bot[botIter].isSeekMode();
-						Vector2 myprediction = pursue.makeUnitTimePrediction(GlobalSetting.pastPosition[botIter], character.getPosition(), Bot[botIter].getPosition());
-						GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
-						System.out.println("player now in ("+ character.getPosition().x+", "+character.getPosition().y+")");
-						System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
-						//Seek the prediction
-						Bot[botIter].Seek(myprediction);
-						
-/*
-						//ask for other wander bots to support
-						for (int i = 0; i < otherbots.length ; i++){
-							if ( Bot[i].checkSeekMode() == false){
-								Bot[i].receiveRequest();
-								//use this bot's prediction
-								Bot[i].updateMyPrediction(Bot[1].givePrediction()); 
-							}
-						}
-*/
-						
-						//2. is in shooting range
-						if( inShootingRange == true ){
-							
-							if( isCloset == true ){
-							
-								if( haveWeapon == true){
-									//shoot();
-								}
-								else{//don't have weapon
-									//requestWeapon();
-								}
-							}
-							else{//not the closest
-								Bot[botIter].isSeekMode();
-								//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
-							}
-								
-						}
-						else{//not in shooting range
-							Bot[botIter].isSeekMode();
-							//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
-						}
-					}
-					else{//no player around
-						if( inSafeSpot == true ){
-							//wander;
-							Bot[botIter].isWanderMode();
-						}
-						else{//go to prediction from other bots
-							Bot[botIter].isSeekMode();
-							Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
-							int checkPredictionIter = 0;
-							while(checkPredictionIter < NumberOfBots){
-								if(checkPredictionIter != botIter){
-									// use other's prediction
-									if(GlobalSetting.predictions.getMyPrediction(checkPredictionIter).x >= 0 &&GlobalSetting.predictions.getMyPrediction(checkPredictionIter).y >= 0){
-										//some one have prediction, use it
-										myprediction = GlobalSetting.predictions.getMyPrediction(checkPredictionIter);
-										GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
-										//also use others' recorded past position
-										GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
-										//System.out.println("Bot " + botIter + " Get prediction from bot" + checkPredictionIter +" , ("+myprediction.x +", "+myprediction.y+")");
-										break;
-									}
-								}
-								checkPredictionIter++;
-							}
-							Bot[botIter].Seek(myprediction);
-							//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
-						}
-					}
+				if(Bot[botIter].checkSeekMode()){
+					Bot[botIter].Seek(GlobalSetting.predictions.getMyPrediction(botIter));
 				}
 				else{
-					//wandering Mode
+				
 					Bot[botIter].Wander();
-					//Bot[botIter].Seek(new Vector2(100, 100));
-					if ( checkPlayer[botIter] == true){
-						System.out.println("System: bot "+botIter+" sees the player right now!");
-						Bot[botIter].isSeekMode();
-						//no past position
-						Vector2 myprediction = pursue.makeUnitTimePrediction(new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), character.getPosition(), Bot[botIter].getPosition());
-						GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
-						//save past position
-						GlobalSetting.pastPosition[botIter] = character.getPosition();
-						System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
-						//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());			
-					}
-					else{//no player around
-						//if ( character.checkRequest() == true ){
-							//System.out.println("bot "+botIter+ " didn't see player");
-							Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
-							int checkPredictionIter = 0;
-							while(checkPredictionIter < NumberOfBots){
-								if(checkPredictionIter != botIter){
-									// use other's prediction
-									if(GlobalSetting.predictions.getMyPrediction(checkPredictionIter).x >= 0 &&GlobalSetting.predictions.getMyPrediction(checkPredictionIter).y >= 0){
-										//some one have prediction, use it
-										myprediction = GlobalSetting.predictions.getMyPrediction(checkPredictionIter);
-										GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
-										//also use others' recorded past position
-										GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
-										//System.out.println("Bot " + botIter + " Get prediction from bot" + checkPredictionIter +" , ("+myprediction.x +", "+myprediction.y+")");
-										break;
-									}
-								}
-								checkPredictionIter++;
-							}
-							
-							if(myprediction.x >=0 && myprediction.y >= 0){
-								// prediction updated by other's data
-								Bot[botIter].isSeekMode();
-							}
-							else{
-								Bot[botIter].isWanderMode();
-							}
-							
-							//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
-							//---Seek.updateTargetPosition(Bot[1].getMyPrediction());	
-						//}
-						//else{
-							//keep wandering
-						//}
-					}
 				}
-				
-				//================End of Decision Tree=================================================================================
-				
-				
-				
-				/*
-				if (botVision.isCharacterInVision(character, Bot[i], OperK))
-				{
-					pushMatrix();
-					fill(240, 255, 125, 125);
-					ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
-					popMatrix();
-					// if find player, reduce health points.
-					GlobalSetting.characterHealthPoints = (GlobalSetting.characterHealthPoints+GlobalSetting.characterMaxHealth-GlobalSetting.deductionPerShot)%GlobalSetting.characterMaxHealth;
-					if (GlobalSetting.characterHealthPoints <= 0)
-					{
-						isGameOver = true;
-					}
-				}
-				*/
-
 			}
 		}
 
@@ -692,6 +718,11 @@ public class MainProgram extends PApplet{
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
 			InitilizeAll();
 		}
-	}	
+	}
+	public void SystemLog(String input){
+		pushMatrix();
+		//text(50, 50, input);
+		popMatrix();
+	}
 
 }

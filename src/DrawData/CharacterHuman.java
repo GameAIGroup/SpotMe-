@@ -387,11 +387,6 @@ public class CharacterHuman  extends PApplet{
 				targetQueue.addAll(A1.result);
 		}
 		
-		count = (count+1)%50;
-
-		if(count == 0){
-			isSeeking = false;
-		}
 		//Gathering dots
 		
 		//make decisions in 0.02 sec frequency
@@ -416,15 +411,10 @@ public class CharacterHuman  extends PApplet{
 				setK(tempResult.getK());
 				setS(tempResult.getS());
 
-				if(count == 0){
-					isSeeking = false;
-					targetQueue.clear();
-				}
-
 			}
 			else{
 				isSeeking = false;
-				
+				targetQueue.clear();
 			}
 			
 		}
@@ -593,7 +583,7 @@ public class CharacterHuman  extends PApplet{
 		
 		else if (or2 > 3*Math.PI/2)
 		{
-			if (or1 >= 0)
+			if (or1 >= 0 && or1 < Math.PI/2)
 			{
 				changeInOr = or1 + (float)(2*Math.PI - or2);
 			}
