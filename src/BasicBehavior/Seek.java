@@ -65,6 +65,20 @@ public class Seek{
 */		
 		
 	}
+	public ResultChange stupidSeek(Vector2 TargetPosition){
+		Vector2 tempV;
+
+		tempV = new Vector2((TargetPosition.getX() - R.getPosition().getX()), (TargetPosition.getY() - R.getPosition().getY()));
+		R.updateVelocity(tempV);
+		R.updateRotation(0);
+		R.updatePosition(operK.updatePositionByV(R.getPosition(), R.getVelocity(), timeConstant));
+		//R.updatePosition(TargetPosition);
+		//System.out.println("Targ: " + TargetPosition.getX() + ", " + TargetPosition.getY());
+		R.updateOrientation(operK.getOrientationByV(R.getOrientation(), R.getVelocity()));
+		System.out.println(R.getOrientation());
+				
+		return R;
+	}	
 	public ResultChange computeSeek(Vector2 TargetPosition){
 		targetPosition = TargetPosition;
 		

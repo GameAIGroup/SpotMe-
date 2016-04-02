@@ -46,6 +46,8 @@ public class CharacterHuman  extends PApplet{
 	private AStar A;
 	private Seek Seek;
 	private boolean isSeeking;
+	public boolean isWandering;
+	public List<Integer> wanderTargetQueue;
 	private int count = 0;
 	public List<Integer> targetQueue;
 	private ResultChange tempResult;
@@ -124,9 +126,11 @@ public class CharacterHuman  extends PApplet{
 			//System.out.println(CurrentPosition.getX()+ ", " +CurrentPosition.getY() );
 		}
 		isSeeking = false;
+		isWandering = false;
 		count = 0;
 		
 		targetQueue = new ArrayList<Integer>();
+		wanderTargetQueue = new ArrayList<Integer>();
 		currentTarget = getPosition();
 		
 		tempResult = new ResultChange(
@@ -279,6 +283,14 @@ public class CharacterHuman  extends PApplet{
 
 			
 			for(int i = 0; i < breadQueue.size(); i++){
+				if(i == breadQueue.size()-1){
+					shape[i].parent.pushMatrix();
+					shape[i].parent.stroke(255, 255, 0);
+					shape[i].parent.fill(0, 0, 0);
+					shape[i].parent.text(myNumber, breadQueue.get(i).getPosition().x, breadQueue.get(i).getPosition().y-30);					
+					shape[i].parent.popMatrix();
+				}
+				
 				updateShapePosition(breadQueue.get(i).getPosition(), i);
 				//updateOrientation(breadQueue.get(i).getOrientation(), i);
 				//System.out.println(breadQueue.get(i).getOrientation());
@@ -346,9 +358,9 @@ public class CharacterHuman  extends PApplet{
 	public void Wander(){
 
 
-		if(isSeeking == false){
+		if(isWandering == false){
 			//if(mousePressed){
-				isSeeking = true;
+			isWandering = true;
 				//call path finding
 				currentTarget = new Vector2((float)Math.random()*(GlobalSetting.screenWidth-100)+50, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
 				
@@ -362,7 +374,7 @@ public class CharacterHuman  extends PApplet{
 */				
 				int closestIndex = CommonFunction.findClose(PublicGraph.G.nodeList, getK().getPosition());
 				
-				//System.out.println(targetIndex+ ", " + closestIndex);
+				System.out.println(targetIndex+ ", " + closestIndex);
 				H2 h1 = new H2(PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex, operK);
 				
 				A1 = new AStar(h1, PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex);
@@ -383,8 +395,8 @@ public class CharacterHuman  extends PApplet{
 */
 				}
 				//System.out.println("");
-				targetQueue.clear();
-				targetQueue.addAll(A1.result);
+				wanderTargetQueue.clear();
+				wanderTargetQueue.addAll(A1.result);
 		}
 		
 		//Gathering dots
@@ -392,33 +404,40 @@ public class CharacterHuman  extends PApplet{
 		//make decisions in 0.02 sec frequency
 		//make one decision
 
-		if(isSeeking == true){
-			if(targetQueue.size()>0){
+		if(isWandering == true){
+			if(wanderTargetQueue.size()>0){
 
 				//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
 	
-				if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate, getK().getPosition())>5){
+				if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(wanderTargetQueue.get(0)).coordinate, getK().getPosition())>5){
 					//System.out.println("Current Target = " + targetQueue.get(0));
-					currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
+					currentTarget = PublicGraph.G.nodeList.get(wanderTargetQueue.get(0)).coordinate;
 				}
 				else{
-					targetQueue.remove(0);
+					wanderTargetQueue.remove(0);
+					Wander();
 				}
 				//currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
 				//targetQueue.remove(0);
-				tempResult = Seek.computeSeek(currentTarget);
+				//tempResult = Seek.computeSeek(currentTarget);
+				tempResult = Seek.stupidSeek(currentTarget);
+
 				//System.out.println(tempResult.getK().getPosition().x + ", "+tempResult.getK().getPosition().y);
 				setK(tempResult.getK());
 				setS(tempResult.getS());
 
 			}
 			else{
-				isSeeking = false;
-				targetQueue.clear();
+				isWandering = false;
+				wanderTargetQueue.clear();
 			}
 			
 		}
 
+	}
+	public void clearWander(){
+		isWandering = false;
+		wanderTargetQueue.clear();
 	}
 	public void Seek(Vector2 target){
 		currentTarget = target;
@@ -467,7 +486,8 @@ public class CharacterHuman  extends PApplet{
 			//System.out.println("----Seek ("+ targetQueue.get(0)+ ") ");
 
 			//targetQueue.remove(0);
-			tempResult = Seek.computeSeek(currentTarget);
+			//tempResult = Seek.computeSeek(currentTarget);
+			tempResult = Seek.stupidSeek(currentTarget);
 			
 			setK(tempResult.getK());
 			setS(tempResult.getS());

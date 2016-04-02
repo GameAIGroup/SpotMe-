@@ -323,6 +323,7 @@ public class MainProgram extends PApplet{
 					//Seek the prediction
 					for(int requestIter = 0 ; requestIter < NumberOfBots; requestIter ++){
 						System.out.println("is Seek---bot "+botIter+ " update bot "+requestIter+" prediction");
+						Bot[botIter].clearWander();
 						Bot[requestIter].isSeekMode();
 						GlobalSetting.predictions.setMyPrediction(requestIter, myprediction);
 					}
@@ -352,12 +353,14 @@ public class MainProgram extends PApplet{
 							}
 						}
 						else{//not the closest
+							Bot[botIter].clearWander();
 							Bot[botIter].isSeekMode();
 							//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
 						}
 							
 					}
 					else{//not in shooting range
+						Bot[botIter].clearWander();
 						Bot[botIter].isSeekMode();
 						//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
 					}
@@ -397,11 +400,11 @@ public class MainProgram extends PApplet{
 							if(OperK.getDisBy2Points(Bot[botIter].getPosition(), myprediction)<5){
 								Bot[botIter].isWanderMode();
 								System.out.println("is Seek---Change from seeking to wander because no prediction, and have reached old prediction");
-								GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
-								GlobalSetting.pastPosition[botIter] =  myprediction;
-								//Bot[botIter].Wander();
+								GlobalSetting.predictions.setMyPrediction(botIter, new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY));
+								GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);								//Bot[botIter].Wander();
 							}
 							else{
+								Bot[botIter].clearWander();
 								Bot[botIter].isSeekMode();
 								System.out.println("is Seek---keep seek old prediction, and have not reached old prediction");
 							}
@@ -410,9 +413,22 @@ public class MainProgram extends PApplet{
 							//Bot[botIter].Wander();
 						}
 						else{
-							Bot[botIter].isSeekMode();
-							GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
-							GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
+							Bot[botIter].clearWander();
+							if(OperK.getDisBy2Points(Bot[botIter].getPosition(), myprediction)<5){
+								Bot[botIter].isWanderMode();
+								System.out.println("is Seek---Have reached old prediction, start wandering");
+								GlobalSetting.predictions.setMyPrediction(botIter, new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY));
+								GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+								//Bot[botIter].Wander();
+							}
+							else{
+								Bot[botIter].clearWander();
+								Bot[botIter].isSeekMode();
+								GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
+								GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
+								System.out.println("is Seek---Have not reached old prediction");
+							}
+
 							//Bot[botIter].Seek(myprediction);
 						}
 						
@@ -428,6 +444,7 @@ public class MainProgram extends PApplet{
 				//Bot[botIter].Seek(new Vector2(100, 100));
 				if ( checkPlayer[botIter] == true){
 					System.out.println("System: bot "+botIter+" sees the player right now!");
+					Bot[botIter].clearWander();
 					Bot[botIter].isSeekMode();
 					//no past position
 					Vector2 myprediction = pursue.makeUnitTimePrediction(new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY), character.getPosition(), Bot[botIter].getPosition());
@@ -438,6 +455,7 @@ public class MainProgram extends PApplet{
 					//send request to other bots
 					for(int requestIter = 0 ; requestIter < NumberOfBots; requestIter ++){
 						System.out.println("bot "+botIter+ " request bot "+requestIter+" join seek");
+						Bot[botIter].clearWander();
 						Bot[requestIter].isSeekMode();
 						GlobalSetting.predictions.setMyPrediction(requestIter, myprediction);
 					}
@@ -450,10 +468,13 @@ public class MainProgram extends PApplet{
 					Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 					if(myprediction.x >=0 && myprediction.y >= 0){
 						// prediction updated by other's data
+						Bot[botIter].clearWander();
 						Bot[botIter].isSeekMode();
 					}
 					else{
 						Bot[botIter].isWanderMode();
+						GlobalSetting.predictions.setMyPrediction(botIter, new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY));
+						GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);						
 					}
 						
 					//---Bot[1].updateMyPrediction(pursue.makePrediction(targetPastPosition, targetCurrentPosition, selfCurrentPosition));
@@ -470,7 +491,7 @@ public class MainProgram extends PApplet{
 
 		
 		//make decisions in 0.02 sec frequency
-		if(botDecisionTimer.checkTimeSlot(100)){
+		if(botDecisionTimer.checkTimeSlot(200)){
 			//bot decision cycle
 			count = (count +1)%200;
 			//For testing safe spots
@@ -488,7 +509,6 @@ public class MainProgram extends PApplet{
 					Bot[botIter].Seek(GlobalSetting.predictions.getMyPrediction(botIter));
 				}
 				else{
-				
 					Bot[botIter].Wander();
 				}
 			}
@@ -645,7 +665,7 @@ public class MainProgram extends PApplet{
 					backgroundColor,
 					GlobalSetting.numberOfBread,
 					Sys,
-					0
+					i
 			);
 		}		
 		
