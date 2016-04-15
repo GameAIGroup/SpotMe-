@@ -51,6 +51,8 @@ public class CharacterHuman  extends PApplet{
 	private int count = 0;
 	public List<Integer> targetQueue;
 	private ResultChange tempResult;
+	
+	public int stopCount;
 
 	
 	Vector2 currentTarget;
@@ -374,7 +376,7 @@ public class CharacterHuman  extends PApplet{
 */				
 				int closestIndex = CommonFunction.findClose(PublicGraph.G.nodeList, getK().getPosition());
 				
-				System.out.println(targetIndex+ ", " + closestIndex);
+				//System.out.println(targetIndex+ ", " + closestIndex);
 				H2 h1 = new H2(PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex, operK);
 				
 				A1 = new AStar(h1, PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex);
@@ -438,6 +440,9 @@ public class CharacterHuman  extends PApplet{
 	public void clearWander(){
 		isWandering = false;
 		wanderTargetQueue.clear();
+	}
+	public void StopAndSee(){
+		
 	}
 	public void Seek(Vector2 target){
 		currentTarget = target;
@@ -718,7 +723,7 @@ public class CharacterHuman  extends PApplet{
 			distanceVector = new Vector2((vector.x - this.getPosition().x), (vector.y - this.getPosition().y));
 			currentOr = this.getOrientation();
 			resultantOr = OperK.getOrientationByV(currentOr, distanceVector);
-			changeInOr = getChangeInOrientation2(resultantOr, this.getOrientation());
+			changeInOr = getChangeInOrientation(resultantOr, this.getOrientation());
 			node.changeInOr = changeInOr;
 			double distance = Math.sqrt(Math.pow(vector.x - this.getPosition().x, 2) + Math.pow(vector.y - this.getPosition().y, 2));
 			node.distanceFromBot = distance;
@@ -730,6 +735,7 @@ public class CharacterHuman  extends PApplet{
 				}
 				else
 				{
+/*					
 					if (changeInOr > maxOrientation)
 					{
 						maxOrNode = node;
@@ -744,10 +750,11 @@ public class CharacterHuman  extends PApplet{
 					{
 						maxAllowedDistance = (float)distance;
 					}
+*/
 				}
 			}
 		}
-		
+/*		
 		for (Node node: tempFilteredNodes)
 		{
 			if (!(node.changeInOr < maxOrientation && node.changeInOr > minOrientation))
@@ -762,7 +769,7 @@ public class CharacterHuman  extends PApplet{
 				}
 			}
 		}
-		
+*/		
 		BotVision botVision = new BotVision(maxOrientation, minOrientation, maxAllowedDistance, filteredNodes);
 		
 		return botVision;

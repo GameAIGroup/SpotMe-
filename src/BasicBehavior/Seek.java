@@ -75,7 +75,7 @@ public class Seek{
 		//R.updatePosition(TargetPosition);
 		//System.out.println("Targ: " + TargetPosition.getX() + ", " + TargetPosition.getY());
 		R.updateOrientation(operK.getOrientationByV(R.getOrientation(), R.getVelocity()));
-		System.out.println(R.getOrientation());
+		//System.out.println(R.getOrientation());
 				
 		return R;
 	}	
