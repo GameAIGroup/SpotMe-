@@ -26,7 +26,7 @@ import processing.core.PApplet;
 public class CharacterHuman  extends PApplet{
 	//shape
 	//private DropShape nowShape;
-	private ColorVectorRGB shapeColor;
+	public ColorVectorRGB shapeColor;
 	private ColorVectorRGB backgroundColor;
 	
 	private HumanShape[] shape;

@@ -131,6 +131,7 @@ public class MainProgram extends PApplet{
 	
 
 	private PImage img, gameOver;
+	private PImage imgWin, gameWin;
 
 	private PImage[] LevelBack;
 	
@@ -172,8 +173,12 @@ public class MainProgram extends PApplet{
 	public static GlobalSetting globalS;
 	public static GameDisplay gameDisplay;
 	boolean setLevel = false;
+	int[] wanderCount;
+	boolean[] keepSeekFlag; 
 	
+	boolean winCheck = false;
 	public void settings(){
+
 
 		globalS = new GlobalSetting();
 		// set system parameter: max V, max Acceleration
@@ -193,6 +198,8 @@ public class MainProgram extends PApplet{
 
 		img = loadImage("TestBackground.JPG");
 		gameOver = loadImage("game-over.jpg");
+		//imgWin = loadImage("win.JPG");
+		gameWin =  loadImage("win.png");
 		
 		LevelBack = new PImage[3];
 		for(int i = 0 ;i < GlobalSetting.LevelNumber; i++){
@@ -215,7 +222,14 @@ public class MainProgram extends PApplet{
 		// the time slat for record breadcrumbs
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
-		
+
+		wanderCount = new int[GlobalSetting.numberOfbots];
+		keepSeekFlag = new boolean[GlobalSetting.numberOfbots]; 
+
+		for(int i = 0 ; i < GlobalSetting.numberOfbots; i++){
+			wanderCount[i] = 0;
+			keepSeekFlag[i] = false;
+		}
 
 		//What should be redo 
 		InitilizeAll();
@@ -236,11 +250,17 @@ public class MainProgram extends PApplet{
 	
 	public void checkWinningCondition()
 	{
-		System.out.println(character.getPosition().x+ ", " +character.getPosition().y);
+		//System.out.println(character.getPosition().x+ ", " +character.getPosition().y);
 		if ((character.getPosition().x > 620) && (character.getPosition().y < 22))
 		{
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
+			//GlobalSetting.LevelControl = GlobalSetting.LevelControl +1;
 			InitilizeAll();
+			
+			if(GlobalSetting.LevelControl == 0 && winCheck == false){
+				winCheck = true;
+			}
+
 		}
 	}
 /*
@@ -252,7 +272,6 @@ public class MainProgram extends PApplet{
  */
 
 	int count =0;
-
 	
 	public void draw(){
 		if (isGameOver)
@@ -260,11 +279,37 @@ public class MainProgram extends PApplet{
 			image(gameOver,width/4, height/4, width/2, height/2);
 			return;
 		}
+		else if(winCheck == true){
+			image(gameWin,0, 0, width, height);
+
+			return;
+		}
 		
 		if (GlobalSetting.playerAIEnable && playerDecisionTimer.checkTimeSlot(50))
 		{
 			characterSeekPosition = character.getSeekPosition(Bot, OperK);
 			character.Seek(characterSeekPosition);
+		}
+		
+		
+		// fix this part to ensure there is 
+		boolean checkGunExist = false;
+		int checkGunIter = 0;
+		while(checkGunIter < GlobalSetting.numberOfbots){
+			if(GlobalSetting.haveGun[checkGunIter] == true){
+				checkGunExist = true;
+				break;
+			}
+			checkGunIter++;
+		}
+		
+		if(checkGunExist == true){
+			// at least wee have a gun in game
+		}
+		else{
+			//int assignGun = 0;
+			int assignGun = (int) (Math.random()*GlobalSetting.numberOfbots);
+			GlobalSetting.haveGun[assignGun] = true;
 		}
 		
 		checkWinningCondition();
@@ -278,7 +323,8 @@ public class MainProgram extends PApplet{
 		
 		for(int i = 0; i < NumberOfBots; i++){
 			Bot[i].updatePosition(Bot[i].getK().getPosition());
-			Bot[i].updateOrientation(Bot[i].getK().getOrientation());		
+			Bot[i].updateOrientation(Bot[i].getK().getOrientation());
+			keepSeekFlag[i] = false;
 		}
 		
 
@@ -295,16 +341,24 @@ public class MainProgram extends PApplet{
 		boolean[] checkPlayer;
 		checkPlayer = new boolean[NumberOfBots];
 		
+		boolean[] askWeapon;
+		askWeapon = new boolean[NumberOfBots];
+
 		for(int botIter = 0; botIter < NumberOfBots; botIter++){
 			checkPlayer[botIter] = false;
 			botVision = Bot[botIter].getVisionRangeNodes(G, OperK, graphGenerator, character); 
 			checkPlayer[botIter] = botVision.isCharacterInVision(character, Bot[botIter], OperK);
 			
 			if(checkPlayer[botIter] == true){
+				//save distance to  player
+				GlobalSetting.distance2Player[botIter]  = OperK.getDisBy2Points(character.getPosition(), Bot[botIter].getPosition());
 				pushMatrix();
-				fill(240, 255, 125, 125);
+				fill(0, 255, 125, 125);
 				ellipse(character.getPosition().x, character.getPosition().y, 200, 200);
 				popMatrix();
+			}
+			else{
+				GlobalSetting.distance2Player[botIter] = Float.POSITIVE_INFINITY;
 			}
 
 			//================Decision Tree=================================================================================
@@ -349,15 +403,28 @@ public class MainProgram extends PApplet{
 */
 					
 					//2. is in shooting range
+					inShootingRange = checkShoot(character.getMyPrediction(), Bot[botIter].getPosition());
 					if( inShootingRange == true ){
-						
+						System.out.println("Bot " + botIter + " should shoot player");
+						if(checkClosestBot() == botIter){
+							isCloset = true;
+						}
+						else{
+							isCloset = false;
+							
+						}
 						if( isCloset == true ){
-						
-							if( haveWeapon == true){
+							//Bot[botIter].shapeColor = new ColorVectorRGB(0, 0, 0);
+							if( GlobalSetting.haveGun[botIter] == true){
 								//shoot();
+								
 							}
 							else{//don't have weapon
 								//requestWeapon();
+								for(int gunIter = 0 ; gunIter < GlobalSetting.numberOfbots ; gunIter++){
+									askWeapon[gunIter] = false;
+								}
+								askWeapon[botIter] = true;
 							}
 						}
 						else{//not the closest
@@ -368,6 +435,8 @@ public class MainProgram extends PApplet{
 							
 					}
 					else{//not in shooting range
+						//Bot[botIter].shapeColor = new ColorVectorRGB(255, 255, 0);
+
 						Bot[botIter].clearWander();
 						Bot[botIter].isSeekMode();
 						//----Seek.updateTargetPosition(Bot[1].getMyPrediction());
@@ -412,9 +481,18 @@ public class MainProgram extends PApplet{
 								GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);								//Bot[botIter].Wander();
 							}
 							else{
-								Bot[botIter].clearWander();
-								Bot[botIter].isSeekMode();
-								System.out.println("is Seek---keep seek old prediction, and have not reached old prediction");
+								keepSeekFlag[botIter] = true;
+								if(wanderCount[botIter] <= 50){
+									Bot[botIter].clearWander();
+									Bot[botIter].isSeekMode();
+									System.out.println("is Seek---keep seek old prediction, and have not reached old prediction");
+								}
+								else{
+									keepSeekFlag[botIter] = false;
+									Bot[botIter].isWanderMode();
+									System.out.println("seek too much time, maybe trapped, go wander");
+								}
+								//wanderCount = (wanderCount +1)%100;
 							}
 
 							//Bot[botIter].isWanderMode();
@@ -499,7 +577,7 @@ public class MainProgram extends PApplet{
 
 		
 		//make decisions in 0.02 sec frequency
-		if(botDecisionTimer.checkTimeSlot(200)){
+		if(botDecisionTimer.checkTimeSlot(100)){
 			//bot decision cycle
 			count = (count +1)%200;
 			//For testing safe spots
@@ -512,12 +590,87 @@ public class MainProgram extends PApplet{
 
 				//Bot[botIter].Wander();
 				//put decision tree in here, since there is not multi-thread
+				//first test (reduce health)
+				
+				//
+				if(keepSeekFlag[botIter] == true){
+					wanderCount[botIter] = (wanderCount[botIter]+1)%100;
+				}
+				else{
+					wanderCount[botIter] = 0;
+				}
+				if(checkPlayer[botIter] == true){
+					//change bot color
+					
+					if(GlobalSetting.haveGun[botIter] == true){
+						Bot[botIter].shapeColor = new ColorVectorRGB(255,0,0); 
+						if(GlobalSetting.characterHealthPoints >= 0 ){
+							GlobalSetting.characterHealthPoints = GlobalSetting.characterHealthPoints - GlobalSetting.minusPoint;
+							if(GlobalSetting.characterHealthPoints <= 0 ){
+								GlobalSetting.characterHealthPoints = 0;
+								if(GlobalSetting.characterLives > 0){
+									GlobalSetting.characterLives = GlobalSetting.characterLives -1;
+									GlobalSetting.characterHealthPoints = GlobalSetting.characterMaxHealth;
+									character.updatePosition(new Vector2(200, 500));
+									//re born to original points.
+								}
+								else{
+									System.out.println("Game Over!!");
+									isGameOver = true;
+									//After game over do something
+								}
+							}
+						}
+						//Bot[botIter].shapeColor = new ColorVectorRGB(255,0,0); 
+						System.out.println("Bot " + botIter + " attack player " + GlobalSetting.minusPoint + " points");
+					}
+					else{
+						System.out.println("Bot " + botIter + " ask for weapon!");
+						Bot[botIter].shapeColor = new ColorVectorRGB(0,0,255); 
+						for(int gunIter = 0; gunIter < GlobalSetting.numberOfbots ; gunIter++){
+							if(askWeapon[gunIter] == true){
+								Bot[gunIter].shapeColor = new ColorVectorRGB(255,0,0); 
+								GlobalSetting.haveGun[gunIter] = true;
+								//askWeapon[gunIter] = false;
+							}
+							else{
+								Bot[gunIter].shapeColor = new ColorVectorRGB(0,0,255); 
+								GlobalSetting.haveGun[gunIter] = false;
+							}
+						}
+						//Bot[botIter].shapeColor = new ColorVectorRGB(0,0,255); 
+					}
+				}
+				else{
+					if(GlobalSetting.haveGun[botIter] == true){
+						Bot[botIter].shapeColor = new ColorVectorRGB(255,114,94); 
+					}
+					else{
+						Bot[botIter].shapeColor = new ColorVectorRGB(94,181,255);
+					}					
+				}
+			
 				
 				if(Bot[botIter].checkSeekMode()){
 					Bot[botIter].Seek(GlobalSetting.predictions.getMyPrediction(botIter));
+					GlobalSetting.distance2Player[botIter]  = OperK.getDisBy2Points(character.getPosition(), Bot[botIter].getPosition());
+
+					if(GlobalSetting.haveGun[botIter] == true){
+						Bot[botIter].shapeColor = new ColorVectorRGB(255,0,0); 
+					}
+					else{
+						Bot[botIter].shapeColor = new ColorVectorRGB(0,0,255);
+					}
 				}
 				else{
+					GlobalSetting.distance2Player[botIter] = Float.POSITIVE_INFINITY;
 					Bot[botIter].Wander();
+					if(GlobalSetting.haveGun[botIter] == true){
+						Bot[botIter].shapeColor = new ColorVectorRGB(255,114,94); 
+					}
+					else{
+						Bot[botIter].shapeColor = new ColorVectorRGB(94,181,255);
+					}						
 				}
 			}
 		}
@@ -536,7 +689,7 @@ public class MainProgram extends PApplet{
 		//PublicGraph.graphGenerator.edgeDraw();
 		//PublicGraph.graphGenerator.displayObstacle();
 		PublicGraph.graphGenerator.displaySafeSpot();
-		PublicGraph.graphGenerator.nodeDisplay(this);
+		//PublicGraph.graphGenerator.nodeDisplay(this);
 
 		//mapCreate.nodeDisplay(this);
 		character.display();
@@ -656,7 +809,13 @@ public class MainProgram extends PApplet{
 			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
 				botPosition = new Vector2((float)Math.random()*(windowWidth-00)+50 , (float)Math.random()*(windowHeight-100)+50);
 			}
-*/			
+*/			ColorVectorRGB botTempColor;
+			if(GlobalSetting.haveGun[i] == true){
+				botTempColor = new ColorVectorRGB(255,114,94); 
+			}
+			else{
+				botTempColor = new ColorVectorRGB(94,181,255);
+			}
 			Bot[i] = new CharacterHuman(
 					this,
 					20,
@@ -671,7 +830,8 @@ public class MainProgram extends PApplet{
 		
 					0,
 					//new ColorVectorRGB((float)Math.random()*255, (float)Math.random()*255, (float)Math.random()*255),
-					new ColorVectorRGB((float)255*(i%2), (float)255*(i%2), (float)255*(i%2)),
+					//new ColorVectorRGB((float)255*(i%2), (float)255*(i%2), (float)255*(i%2)),
+					botTempColor,
 					backgroundColor,
 					GlobalSetting.numberOfBread,
 					Sys,
@@ -743,6 +903,32 @@ public class MainProgram extends PApplet{
 		pushMatrix();
 		//text(50, 50, input);
 		popMatrix();
+	}
+	public boolean checkShoot(Vector2 playerPosition, Vector2 botPosition){
+		float distance;
+		distance = OperK.getDisBy2Points(playerPosition, botPosition);
+		if(distance <= GlobalSetting.maxShootRange){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	public int checkClosestBot(){
+		int currentClose = 0;
+		float currentDis = Float.POSITIVE_INFINITY;
+		for(int i = 0; i < GlobalSetting.numberOfbots; i++){
+			if(i == 0){
+				currentClose = 0;
+				currentDis = GlobalSetting.distance2Player[i];
+			}
+			if(GlobalSetting.distance2Player[i] < currentDis){
+				currentClose = i;
+				currentDis = GlobalSetting.distance2Player[i];
+				
+			}
+		}
+		return currentClose;
 	}
 
 }

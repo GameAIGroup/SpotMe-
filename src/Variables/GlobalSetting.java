@@ -15,6 +15,8 @@ public class GlobalSetting {
 	
 	public static double maxVisionAngle;
 	public static float maxVisionRange;
+	public static float maxShootRange;
+
 	
 	public static int numberOfbots;
 	
@@ -42,20 +44,39 @@ public class GlobalSetting {
 	public static boolean playerAIEnable;
 	public static int characterRadius;
 	
+	public static int minusPoint;
+	public static boolean[] haveGun;
+	public static float[] distance2Player;
+
+	
 	public GlobalSetting(){
 		screenWidth = 800;
 		screenHeight = 600;
 		
 		HeuristicMode = 1;
 
-		numberOfBread = 10;
+		numberOfBread = 1;
 		
 		tileNumber = 50;
 		nodeSize = 5;
 		obstacleMargin = 3;
 		
-		numberOfbots = 2;
+		numberOfbots = 1;
 		wanderTimeBound = 5;
+		
+		
+		//weapon
+		minusPoint =  5;
+		haveGun = new boolean[numberOfbots];
+		distance2Player = new float[numberOfbots];
+		for(int i = 0 ; i< numberOfbots; i++){
+			if(i == 0 ){
+				//default weapon is in bot 0
+				haveGun[i] = true;
+			}
+			distance2Player[i] = Float.POSITIVE_INFINITY;
+ 		}
+		
 		
 		
 		//prediction------------------------------------------------------------------------------------------
@@ -69,10 +90,10 @@ public class GlobalSetting {
 		keyMoveDistance = 5;
 		
 		sizeOfSafeSpot = 50;
-		numberOfSafeSpot = 5;
+		numberOfSafeSpot = 8;
 		
-		characterHealthPoints = 100;
-		characterMaxHealth = 100;
+		characterHealthPoints = 200;
+		characterMaxHealth = 200;
 		deductionPerShot = 4;
 
 		characterLives = 3;		
@@ -87,8 +108,10 @@ public class GlobalSetting {
 
 		maxVisionAngle = 0.6;
 		maxVisionRange = 200;
+		maxShootRange = 200;
 
-		maxVisionAngle = 0.3;
+		
+		maxVisionAngle = 0.6;
 		
 		playerAIEnable = true;
 
