@@ -49,6 +49,7 @@ public class CharacterDrop {
 	
 	int targetIndex;
 	AStar A1;
+	PApplet parent;
 
 	
 	//prediction
@@ -79,6 +80,7 @@ public class CharacterDrop {
 			int number
 	)
 	{
+		parent =P;
 		//prediction------------------
 		myNumber = number;
 				
@@ -396,33 +398,177 @@ public class CharacterDrop {
 		double distance, nearestDistance;
 		nearestDistance = Double.POSITIVE_INFINITY;
 		
-		for (int i=0; i< numberOfBots; i++)
-		{
-			distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
-			//if (distance < 100)
-			//{
-				if (distance < nearestDistance)
-				{
-					nearestBot = Bots[i];
-					nearestDistance = distance;
+		if(GlobalSetting.AIMode == 0){
+			// only seek the exit
+			for (int i=0; i< numberOfBots; i++)
+			{
+				distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
+				//if (distance < 100)
+				//{
+					if (distance < nearestDistance)
+					{
+						nearestBot = Bots[i];
+						nearestDistance = distance;
+					}
+				//}
+			}
+			
+			if (nearestDistance < GlobalSetting.fleeDistance)
+			{
+				distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
+				distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
+				seekposition = new Vector2(distanceVector.x + this.getPosition().x, distanceVector.y + this.getPosition().y);
+			}
+			else
+			{
+				seekposition = new Vector2(635, 15);
+				seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
+			}
+			
+		}
+		else if(GlobalSetting.AIMode == 1){
+			List<Vector2> safespotPoints = getSafeSpot();
+			//System.out.println("go safe");
+			for (int i=0; i< numberOfBots; i++)
+			{
+				distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
+				//if (distance < 100)
+				//{
+					if (distance < nearestDistance)
+					{
+						nearestBot = Bots[i];
+						nearestDistance = distance;
+					}
+				//}
+			}
+			float dis2Safe = Float.POSITIVE_INFINITY;
+			float tempSafeDis;
+			int safeIndex = 0;
+
+			if (nearestDistance < GlobalSetting.fleeDistance)
+			{
+				//when going to flee
+				if(safespotPoints.size()>0){
+					//int randomIndex = (int) (Math.random()*(safespotPoints.size()));
+					int randomIndex = safeIndex;
+					//System.out.println("go safe point " + randomIndex);
+					seekposition = new Vector2(safespotPoints.get(randomIndex).x , safespotPoints.get(randomIndex).y);
+
 				}
-			//}
+				else{
+					distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
+					distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
+					seekposition = new Vector2(distanceVector.x + this.getPosition().x, distanceVector.y + this.getPosition().y);
+				}
+			}
+			else
+			{
+				seekposition = new Vector2(635, 15);
+				seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
+			}
+			
 		}
-		
-		if (nearestDistance < 200)
-		{
-			distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
-			distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
-			seekposition = new Vector2(distanceVector.x + this.getPosition().x, distanceVector.y + this.getPosition().y);
+		else if (GlobalSetting.AIMode == 2){
+			List<Vector2> safespotPoints = getSafeSpot();
+			//System.out.println("go safe");
+			for (int i=0; i< numberOfBots; i++)
+			{
+				distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
+				//if (distance < 100)
+				//{
+					if (distance < nearestDistance)
+					{
+						nearestBot = Bots[i];
+						nearestDistance = distance;
+					}
+				//}
+			}
+			float dis2Safe = Float.POSITIVE_INFINITY;
+			float tempSafeDis;
+			int safeIndex = 0;
+			for(int safeIter =0; safeIter < safespotPoints.size(); safeIter++){
+				tempSafeDis = operK.getDisBy2Points(getPosition(), safespotPoints.get(safeIter));
+				if(tempSafeDis < dis2Safe){
+					safeIndex = safeIter;
+					dis2Safe = tempSafeDis;
+				}
+			}
+			
+			if (nearestDistance < GlobalSetting.fleeDistance)
+			{
+				//when going to flee
+				if(safespotPoints.size()>0){
+					//int randomIndex = (int) (Math.random()*(safespotPoints.size()));
+					int randomIndex = safeIndex;
+					//System.out.println("go safe point " + randomIndex);
+					seekposition = new Vector2(safespotPoints.get(randomIndex).x , safespotPoints.get(randomIndex).y);
+
+				}
+				else{
+					distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
+					distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
+					seekposition = new Vector2(distanceVector.x + this.getPosition().x, distanceVector.y + this.getPosition().y);
+				}
+			}
+			else
+			{
+				seekposition = new Vector2(635, 15);
+				seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
+			}
+			
 		}
-		else
-		{
+		else if (GlobalSetting.AIMode == 3){
+			List<Vector2> safespotPoints = getSafeSpot();
+			//System.out.println("go safe");
+			for (int i=0; i< numberOfBots; i++)
+			{
+				distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
+				//if (distance < 100)
+				//{
+					if (distance < nearestDistance)
+					{
+						nearestBot = Bots[i];
+						nearestDistance = distance;
+					}
+				//}
+			}
+			float dis2Safe = Float.POSITIVE_INFINITY;
+			float tempSafeDis;
+			int safeIndex = -1;
+			for(int safeIter =0; safeIter < safespotPoints.size(); safeIter++){
+				if(safespotPoints.get(safeIter).y > getPosition().y){
+					safeIndex = safeIter;
+				}
+			}
+			
+			if (nearestDistance < GlobalSetting.fleeDistance)
+			{
+				//when going to flee
+				if(safeIndex>=0){
+					//int randomIndex = (int) (Math.random()*(safespotPoints.size()));
+					int randomIndex = safeIndex;
+					//System.out.println("go safe point " + randomIndex);
+					seekposition = new Vector2(safespotPoints.get(randomIndex).x , safespotPoints.get(randomIndex).y);
+
+				}
+				else{
+					distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
+					distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
+					seekposition = new Vector2(distanceVector.x + this.getPosition().x, distanceVector.y + this.getPosition().y);
+				}
+			}
+			else
+			{
+				seekposition = new Vector2(635, 15);
+				seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
+			}
+			
+		}		
+		else{
 			seekposition = new Vector2(635, 15);
 			seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
+			
 		}
-
-		//seekposition = new Vector2(635, 15);
-		//seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
 
 		return seekposition;
 	}
@@ -539,6 +685,23 @@ public class CharacterDrop {
 			result = ((float)totalMove/Math.abs(totalMove))*GlobalSetting.keyMoveDistance;
 		}
 		return result;
+	}
+	public List<Vector2> getSafeSpot(){
+		List<Vector2> result;
+		Vector2 tempPoint;
+		result = new ArrayList<Vector2>();
+
+		for(int i = 0; i <PublicGraph.graphGenerator.SafeSpotsList.size(); i++){
+			tempPoint = new Vector2((PublicGraph.graphGenerator.SafeSpotsList.get(i).ObstacleMax.x
+									+PublicGraph.graphGenerator.SafeSpotsList.get(i).ObstacleMin.x)/2,
+									(PublicGraph.graphGenerator.SafeSpotsList.get(i).ObstacleMax.y
+									+PublicGraph.graphGenerator.SafeSpotsList.get(i).ObstacleMin.y)/2);
+			tempPoint = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, tempPoint)).coordinate;
+			if(PublicGraph.graphGenerator.checkSafeSpots(tempPoint) == true &&PublicGraph.graphGenerator.checkObstacle(tempPoint)==false){
+				result.add(tempPoint);
+			}
+		}
+			return result;
 	}
 	
 

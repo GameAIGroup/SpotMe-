@@ -278,6 +278,7 @@ public class MainProgram extends PApplet{
 	int count =0;
 	
 	public void draw(){
+		
 		if (isGameOver)
 		{
 			image(gameOver,width/4, height/4, width/2, height/2);
@@ -288,6 +289,7 @@ public class MainProgram extends PApplet{
 
 			return;
 		}
+
 		
 		if (GlobalSetting.playerAIEnable && playerDecisionTimer.checkTimeSlot(100))
 		{
@@ -599,7 +601,7 @@ public class MainProgram extends PApplet{
 		//make decisions in 0.02 sec frequency
 		if(botDecisionTimer.checkTimeSlot(150)){
 			//bot decision cycle
-			count = (count +1)%200;
+			count = (count +1)%100;
 			//For testing safe spots
 			int[] otherbots;//
 			//--------------
@@ -722,7 +724,26 @@ public class MainProgram extends PApplet{
 		}
 		GameDisplay.displayLives();
 		GameDisplay.displayHealth();
+		
 
+
+		List<Vector2> charaSafe = character.getSafeSpot();
+		for(int safeIter = 0; safeIter < charaSafe.size(); safeIter++){
+			pushMatrix();
+			fill(255);
+/*			
+			ellipse((PublicGraph.graphGenerator.SafeSpotsList.get(safeIter).ObstacleMax.x +PublicGraph.graphGenerator.SafeSpotsList.get(safeIter).ObstacleMin.x)/2,
+					(PublicGraph.graphGenerator.SafeSpotsList.get(safeIter).ObstacleMax.y +PublicGraph.graphGenerator.SafeSpotsList.get(safeIter).ObstacleMin.y)/2, 10, 10);
+*/
+			ellipse(charaSafe.get(safeIter).x, charaSafe.get(safeIter).y, 10, 10);
+			popMatrix();
+		}
+		pushMatrix();
+		fill(0);
+		ellipse(characterSeekPosition.x, characterSeekPosition.y, 10, 10);
+		popMatrix();
+
+		
 	}
 	
 /*

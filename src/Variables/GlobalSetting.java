@@ -49,7 +49,8 @@ public class GlobalSetting {
 	public static float[] distance2Player;
 
 	public static int botMode;
-	
+	public static int AIMode;
+	public static int fleeDistance;
 	
 	public GlobalSetting(){
 		screenWidth = 800;
@@ -72,7 +73,7 @@ public class GlobalSetting {
 		keyMoveDistance = 10;
 		
 		sizeOfSafeSpot = 50;
-		numberOfSafeSpot = 3;
+		numberOfSafeSpot = 5;
 		
 		characterHealthPoints = 200;
 		characterMaxHealth = 200;
@@ -88,7 +89,7 @@ public class GlobalSetting {
 		obstacleMargin = 3;
 
 
-		maxVisionAngle = Math.PI*4/5;
+		maxVisionAngle = Math.PI*2/5;
 		maxVisionRange = 100;
 		maxShootRange = 100;
 
@@ -96,7 +97,9 @@ public class GlobalSetting {
 		//maxVisionAngle = 0.6;
 		
 		playerAIEnable = true;
-		botMode = 0;
+		botMode = 1;
+		AIMode = 3;
+		fleeDistance = 200;
 		
 
 	}
