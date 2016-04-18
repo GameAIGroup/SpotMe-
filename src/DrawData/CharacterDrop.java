@@ -536,7 +536,7 @@ public class CharacterDrop {
 			float tempSafeDis;
 			int safeIndex = -1;
 			for(int safeIter =0; safeIter < safespotPoints.size(); safeIter++){
-				if(safespotPoints.get(safeIter).y > getPosition().y){
+				if(safespotPoints.get(safeIter).y < getPosition().y){
 					safeIndex = safeIter;
 				}
 			}
