@@ -3,7 +3,9 @@ package BasicBehavior;
 import BasicStructures.Vector2;
 import MovementStructures.KinematicOperations;
 import MovementStructures.SystemParameter;
+import Variables.CommonFunction;
 import Variables.GlobalSetting;
+import Variables.PublicGraph;
 
 public class Pursue {
 	
@@ -80,7 +82,9 @@ public class Pursue {
 			float tempTime = 1.0f;
 			newTargetPosition = new Vector2(estimatedVelocity.x*tempTime+targetCurrentPosition.x, estimatedVelocity.y*tempTime+targetCurrentPosition.y);
 			// timeDiff is the needed time to reach prediction position
-			Result = newTargetPosition;
+			int closeIndex = CommonFunction.findClose(PublicGraph.G.nodeList, newTargetPosition);
+			Result = PublicGraph.G.nodeList.get(closeIndex).coordinate;
+			
 		}
 		return Result;
 	}	

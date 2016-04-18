@@ -30,7 +30,7 @@ public class BotVision {
 		float resultantOr = OperK.getOrientationByV(currentOr, distanceVector);
 		float changeInOr = bot.getChangeInOrientation(resultantOr, currentOr);
 		double distance = Math.sqrt(Math.pow(character.getPosition().x - bot.getPosition().x, 2) + Math.pow(character.getPosition().y - bot.getPosition().y, 2));
-		
+/*		
 		if (distance < maxAllowedDistance)
 		{
 			if ((changeInOr < maxOrientation && changeInOr > minOrientation))
@@ -38,7 +38,7 @@ public class BotVision {
 				characterInVision = true;
 			}
 		}
-		
+*/		
 		for (Node node: visionNodes)
 		{
 

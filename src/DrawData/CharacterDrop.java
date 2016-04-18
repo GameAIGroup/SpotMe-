@@ -356,16 +356,18 @@ public class CharacterDrop {
 		if(A1.isFind == false){
 			System.out.println("Didn't find!!");
 		}
+		
 		//System.out.println("");
 		targetQueue.clear();
 		targetQueue.addAll(A1.result);
 		//remove self
 		targetQueue.remove(0);
 
+		
 		if(targetQueue.size()>0){
 
 			//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
-			if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate, getK().getPosition())>5){
+			if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate, getK().getPosition())>0){
 				//System.out.println("Current Target = " + targetQueue.get(0));
 				currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
 				//System.out.println("----Seek ("+ targetQueue.get(0)+ ") ");
@@ -381,7 +383,7 @@ public class CharacterDrop {
 			
 			setK(tempResult.getK());
 			setS(tempResult.getS());
-			//updatePosition(currentTarget);
+			updatePosition(currentTarget);
 		}
 	}
 	
@@ -397,17 +399,17 @@ public class CharacterDrop {
 		for (int i=0; i< numberOfBots; i++)
 		{
 			distance = Math.sqrt(Math.pow(Bots[i].getPosition().x - this.getPosition().x, 2) + Math.pow(Bots[i].getPosition().y - this.getPosition().y, 2));
-			if (distance < 100)
-			{
+			//if (distance < 100)
+			//{
 				if (distance < nearestDistance)
 				{
 					nearestBot = Bots[i];
 					nearestDistance = distance;
 				}
-			}
+			//}
 		}
 		
-		if (nearestDistance < 100)
+		if (nearestDistance < 200)
 		{
 			distanceVector = Operk.normalizeVector2(new Vector2(-(nearestBot.getPosition().x - this.getPosition().x), -(nearestBot.getPosition().y - this.getPosition().y)));
 			distanceVector = new Vector2((float)(distanceVector.x * nearestDistance), (float)(distanceVector.y * nearestDistance));
@@ -415,8 +417,13 @@ public class CharacterDrop {
 		}
 		else
 		{
-			seekposition = new Vector2(631, 19);
+			seekposition = new Vector2(635, 15);
+			seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
 		}
+
+		//seekposition = new Vector2(635, 15);
+		//seekposition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, seekposition)).coordinate;
+
 		return seekposition;
 	}
 

@@ -100,6 +100,7 @@ public class MainProgram extends PApplet{
 	private TimeControler botDecisionTimer;
 	private TimeControler playerDecisionTimer;
 	private TimeControler breadTimer;
+	private TimeControler gameTime;
 	
 	//Setting for environment
 	private ColorVectorRGB backgroundColor;
@@ -218,18 +219,16 @@ public class MainProgram extends PApplet{
 		botDecisionTimer.initialTimer();
 		playerDecisionTimer = new TimeControler();
 		playerDecisionTimer.initialTimer();
+		
+		gameTime = new TimeControler();
+		gameTime.initialTimer();
 
+		
+		
 		// the time slat for record breadcrumbs
 		breadTimer = new TimeControler();
 		breadTimer.initialTimer();
 
-		wanderCount = new int[GlobalSetting.numberOfbots];
-		keepSeekFlag = new boolean[GlobalSetting.numberOfbots]; 
-
-		for(int i = 0 ; i < GlobalSetting.numberOfbots; i++){
-			wanderCount[i] = 0;
-			keepSeekFlag[i] = false;
-		}
 
 		//What should be redo 
 		InitilizeAll();
@@ -243,7 +242,7 @@ public class MainProgram extends PApplet{
 		{
 			pushMatrix();
 			fill(240, 255, 125);
-			ellipse(node.coordinate.x, node.coordinate.y, (float)5, (float)5);
+			ellipse(node.coordinate.x, node.coordinate.y, (float)GlobalSetting.nodeSize, (float)GlobalSetting.nodeSize);
 			popMatrix();
 		}
 	}
@@ -251,12 +250,17 @@ public class MainProgram extends PApplet{
 	public void checkWinningCondition()
 	{
 		//System.out.println(character.getPosition().x+ ", " +character.getPosition().y);
-		if ((character.getPosition().x > 620) && (character.getPosition().y < 22))
+		if ((character.getPosition().x > 620) && (character.getPosition().y < 30))
 		{
+			String time = gameTime.computeTime( gameTime.getTimeDiffer());
+			System.out.println("System: finishe level " +GlobalSetting.LevelControl+ ", in " + time);
+
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
 			//GlobalSetting.LevelControl = GlobalSetting.LevelControl +1;
+			GlobalSetting.numberOfbots = GlobalSetting.numberOfbots+(1+GlobalSetting.LevelControl);
+			GlobalSetting.initialBot();
 			InitilizeAll();
-			
+			gameTime.setStartTime();
 			if(GlobalSetting.LevelControl == 0 && winCheck == false){
 				winCheck = true;
 			}
@@ -285,7 +289,7 @@ public class MainProgram extends PApplet{
 			return;
 		}
 		
-		if (GlobalSetting.playerAIEnable && playerDecisionTimer.checkTimeSlot(50))
+		if (GlobalSetting.playerAIEnable && playerDecisionTimer.checkTimeSlot(100))
 		{
 			characterSeekPosition = character.getSeekPosition(Bot, OperK);
 			character.Seek(characterSeekPosition);
@@ -405,7 +409,7 @@ public class MainProgram extends PApplet{
 					//2. is in shooting range
 					inShootingRange = checkShoot(character.getMyPrediction(), Bot[botIter].getPosition());
 					if( inShootingRange == true ){
-						System.out.println("Bot " + botIter + " should shoot player");
+						//System.out.println("Bot " + botIter + " should shoot player");
 						if(checkClosestBot() == botIter){
 							isCloset = true;
 						}
@@ -450,7 +454,7 @@ public class MainProgram extends PApplet{
 					}
 					else{//go to prediction from other bots
 						//Bot[botIter].isSeekMode();
-						System.out.println("is Seek---bot "+ botIter+ " is seeking, but have NO!!! target");
+						//System.out.println("is Seek---bot "+ botIter+ " is seeking, but have NO!!! target");
 						
 						Vector2 oldPrediction = GlobalSetting.predictions.getMyPrediction(botIter);
 						Vector2 myprediction = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
@@ -485,12 +489,14 @@ public class MainProgram extends PApplet{
 								if(wanderCount[botIter] <= 50){
 									Bot[botIter].clearWander();
 									Bot[botIter].isSeekMode();
-									System.out.println("is Seek---keep seek old prediction, and have not reached old prediction");
+									//System.out.println("is Seek---keep seek old prediction, and have not reached old prediction");
 								}
 								else{
 									keepSeekFlag[botIter] = false;
 									Bot[botIter].isWanderMode();
-									System.out.println("seek too much time, maybe trapped, go wander");
+									GlobalSetting.predictions.setMyPrediction(botIter, new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY));
+									GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);											
+									//System.out.println("seek too much time, maybe trapped, go wander");
 								}
 								//wanderCount = (wanderCount +1)%100;
 							}
@@ -502,7 +508,7 @@ public class MainProgram extends PApplet{
 							Bot[botIter].clearWander();
 							if(OperK.getDisBy2Points(Bot[botIter].getPosition(), myprediction)<5){
 								Bot[botIter].isWanderMode();
-								System.out.println("is Seek---Have reached old prediction, start wandering");
+								//System.out.println("is Seek---Have reached old prediction, start wandering");
 								GlobalSetting.predictions.setMyPrediction(botIter, new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY));
 								GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 								//Bot[botIter].Wander();
@@ -512,7 +518,21 @@ public class MainProgram extends PApplet{
 								Bot[botIter].isSeekMode();
 								GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
 								GlobalSetting.pastPosition[botIter] = GlobalSetting.pastPosition[checkPredictionIter];
-								System.out.println("is Seek---Have not reached old prediction");
+								//System.out.println("is Seek---Have not reached old prediction");
+								
+								keepSeekFlag[botIter] = true;
+								if(wanderCount[botIter] <= 50){
+									Bot[botIter].clearWander();
+									Bot[botIter].isSeekMode();
+									//System.out.println("**is Seek---keep seek old prediction, and have not reached old prediction");
+								}
+								else{
+									keepSeekFlag[botIter] = false;
+									Bot[botIter].isWanderMode();
+									GlobalSetting.predictions.setMyPrediction(botIter, new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY));
+									GlobalSetting.pastPosition[botIter] =  new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);											
+									//System.out.println("** seek too much time, maybe trapped, go wander");
+								}
 							}
 
 							//Bot[botIter].Seek(myprediction);
@@ -537,10 +557,10 @@ public class MainProgram extends PApplet{
 					GlobalSetting.predictions.setMyPrediction(botIter, myprediction);
 					//save past position
 					GlobalSetting.pastPosition[botIter] = character.getPosition();
-					System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
+					//System.out.println("bot "+botIter+" predict player in (" + GlobalSetting.predictions.getMyPrediction(botIter).x +", " +GlobalSetting.predictions.getMyPrediction(botIter).y+")");
 					//send request to other bots
 					for(int requestIter = 0 ; requestIter < NumberOfBots; requestIter ++){
-						System.out.println("bot "+botIter+ " request bot "+requestIter+" join seek");
+						//System.out.println("bot "+botIter+ " request bot "+requestIter+" join seek");
 						Bot[botIter].clearWander();
 						Bot[requestIter].isSeekMode();
 						GlobalSetting.predictions.setMyPrediction(requestIter, myprediction);
@@ -577,7 +597,7 @@ public class MainProgram extends PApplet{
 
 		
 		//make decisions in 0.02 sec frequency
-		if(botDecisionTimer.checkTimeSlot(100)){
+		if(botDecisionTimer.checkTimeSlot(150)){
 			//bot decision cycle
 			count = (count +1)%200;
 			//For testing safe spots
@@ -622,10 +642,10 @@ public class MainProgram extends PApplet{
 							}
 						}
 						//Bot[botIter].shapeColor = new ColorVectorRGB(255,0,0); 
-						System.out.println("Bot " + botIter + " attack player " + GlobalSetting.minusPoint + " points");
+						//System.out.println("Bot " + botIter + " attack player " + GlobalSetting.minusPoint + " points");
 					}
 					else{
-						System.out.println("Bot " + botIter + " ask for weapon!");
+						//System.out.println("Bot " + botIter + " ask for weapon!");
 						Bot[botIter].shapeColor = new ColorVectorRGB(0,0,255); 
 						for(int gunIter = 0; gunIter < GlobalSetting.numberOfbots ; gunIter++){
 							if(askWeapon[gunIter] == true){
@@ -686,7 +706,7 @@ public class MainProgram extends PApplet{
 			}
 		}
 		//display		
-		//PublicGraph.graphGenerator.edgeDraw();
+		PublicGraph.graphGenerator.edgeDraw();
 		//PublicGraph.graphGenerator.displayObstacle();
 		PublicGraph.graphGenerator.displaySafeSpot();
 		//PublicGraph.graphGenerator.nodeDisplay(this);
@@ -723,6 +743,15 @@ public class MainProgram extends PApplet{
 		PublicGraph.mapCreate.markObstacles(new Vector2(mouseX, mouseY));
 	}
 	public void InitilizeAll(){
+		NumberOfBots = GlobalSetting.numberOfbots;		
+		wanderCount = new int[GlobalSetting.numberOfbots];
+		keepSeekFlag = new boolean[GlobalSetting.numberOfbots]; 
+
+		for(int i = 0 ; i < GlobalSetting.numberOfbots; i++){
+			wanderCount[i] = 0;
+			keepSeekFlag[i] = false;
+		}
+
 		
 		characterSeekPosition = new Vector2(631, 19);
 		GlobalSetting.characterHealthPoints = GlobalSetting.characterMaxHealth;
@@ -788,7 +817,7 @@ public class MainProgram extends PApplet{
 				character.getS().getAngularAccel()
 		);	
 		
-		NumberOfBots = GlobalSetting.numberOfbots;
+
 		Bot = new CharacterHuman[NumberOfBots];
 		//botsTargetQueue = new ArrayList<Integer>[NumberOfBots]();
 
@@ -802,9 +831,21 @@ public class MainProgram extends PApplet{
 				
 		
 		for(int i = 0; i<NumberOfBots ;i ++ ){
-			Vector2 botPosition = new Vector2((float)Math.random()*(windowWidth-100)+50 , (float)Math.random()*(windowHeight-100)+50);
-			botPosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, botPosition)).coordinate;
+			Vector2 botPosition;
 			
+			if(GlobalSetting.botMode == 0){
+				botPosition = new Vector2((float)Math.random()*(windowWidth-100)+50 , (float)Math.random()*(windowHeight-100)+50);
+				botPosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, botPosition)).coordinate;
+			}
+			else if(GlobalSetting.botMode == 1){
+				botPosition = new Vector2((float)Math.random()*(GlobalSetting.screenWidth/GlobalSetting.numberOfbots-50)+GlobalSetting.screenWidth/GlobalSetting.numberOfbots*i, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
+				botPosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, botPosition)).coordinate;
+
+			}
+			else{
+				botPosition = new Vector2((float)Math.random()*(windowWidth-100)+50 , (float)Math.random()*(windowHeight-100)+50);
+				botPosition = PublicGraph.G.nodeList.get(CommonFunction.findClose(PublicGraph.G.nodeList, botPosition)).coordinate;
+			}
 /*
 			while(PublicGraph.graphGenerator.ObsOverlapList.get(CommonFunction.findClose(currentNodeList, botPosition))==1){
 				botPosition = new Vector2((float)Math.random()*(windowWidth-00)+50 , (float)Math.random()*(windowHeight-100)+50);
@@ -930,5 +971,6 @@ public class MainProgram extends PApplet{
 		}
 		return currentClose;
 	}
+
 
 }

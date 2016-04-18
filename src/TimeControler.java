@@ -1,3 +1,4 @@
+import java.util.concurrent.TimeUnit;
 
 public class TimeControler {
 	public long startTime;
@@ -25,5 +26,15 @@ public class TimeControler {
 		endTime = System.currentTimeMillis();
 		result = (endTime - startTime);
 		return result;
+	}
+	public String computeTime(long diff){
+		String time;
+		time = String.format("%02d:%02d:%02d", 
+				TimeUnit.MILLISECONDS.toHours(diff),
+				TimeUnit.MILLISECONDS.toMinutes(diff) -  
+				TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(diff)), // The change is in this line
+				TimeUnit.MILLISECONDS.toSeconds(diff) - 
+				TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(diff))); 		
+		return time;
 	}
 }

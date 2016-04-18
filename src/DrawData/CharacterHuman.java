@@ -364,7 +364,13 @@ public class CharacterHuman  extends PApplet{
 			//if(mousePressed){
 			isWandering = true;
 				//call path finding
-				currentTarget = new Vector2((float)Math.random()*(GlobalSetting.screenWidth-100)+50, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
+				
+				if(GlobalSetting.botMode == 0){
+					currentTarget = new Vector2((float)Math.random()*(GlobalSetting.screenWidth-100)+50, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
+				}
+				else if(GlobalSetting.botMode ==1){
+					currentTarget = new Vector2((float)Math.random()*(GlobalSetting.screenWidth/GlobalSetting.numberOfbots-50)+GlobalSetting.screenWidth/GlobalSetting.numberOfbots*myNumber, (float)Math.random()*(GlobalSetting.screenHeight-100)+50);
+				}
 				
 				int targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, currentTarget);
 				
@@ -500,91 +506,7 @@ public class CharacterHuman  extends PApplet{
 		}
 		else{
 		}
-		
-		/*
-		//isSeeking = false;
-		if(isSeeking == false){
-			//if(mousePressed){
-				isSeeking = true;
-				//call path finding
-				currentTarget = target;
-				int targetIndex = CommonFunction.findClose(PublicGraph.G.nodeList, currentTarget);
-				
-				int closestIndex = CommonFunction.findClose(PublicGraph.G.nodeList, getK().getPosition());
-				
-				//System.out.println(targetIndex+ ", " + closestIndex);
-				H2 h1 = new H2(PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex, operK);
-				
-				A1 = new AStar(h1, PublicGraph.G.nodeList, PublicGraph.G.edgeList, targetIndex, closestIndex);
 
-				while(A1.openList.size()>0){
-					A1.computeAStar(PublicGraph.G.nodeList, PublicGraph.G.edgeList);
-					//System.out.println("-----------");
-				}
-				if(A1.isFind == false){
-					System.out.println("Didn't find!!");
-				}
-				else{
-
-					System.out.print("\r\nAStar with H1 Path: ");
-					for(int i = 0 ;i < A1.result.size(); i++){
-						System.out.print(" " + A1.result.get(i)+" ");
-					}
-
-				}
-				//System.out.println("");
-				targetQueue.clear();
-				targetQueue.addAll(A1.result);
-				//remove self
-				targetQueue.remove(0);
-		}
-	
-		count = (count+1)%3;
-
-		if(count == 0){
-			isSeeking = false;
-		}
-		//Gathering dots
-		
-		//make decisions in 0.02 sec frequency
-		//make one decision
-
-		if(isSeeking == true){
-			if(targetQueue.size()>0){
-
-				//if(findClose(currentNodeList,character.getK().getPosition())!=currentTargetQueue.get(0)){
-	
-				if(operK.getDisBy2Points(PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate, getK().getPosition())>5){
-					//System.out.println("Current Target = " + targetQueue.get(0));
-					currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
-					System.out.println("----Seek ("+ targetQueue.get(0)+ ") ");
-				}
-				else{
-					targetQueue.remove(0);
-				}
-				//currentTarget = PublicGraph.G.nodeList.get(targetQueue.get(0)).coordinate;
-				//System.out.println("----Seek ("+ targetQueue.get(0)+ ") ");
-
-				//targetQueue.remove(0);
-				tempResult = Seek.computeSeek(currentTarget);
-				
-				setK(tempResult.getK());
-				setS(tempResult.getS());
-				//updatePosition(currentTarget);
-				
-				if(count == 0){
-					isSeeking = false;
-					targetQueue.clear();
-				}
-
-			}
-			else{
-				isSeeking = false;
-				
-			}
-			
-		}
-*/
 	}
 
 	
@@ -656,7 +578,8 @@ public class CharacterHuman  extends PApplet{
 			node.changeInOr = changeInOr;
 			double distance = Math.sqrt(Math.pow(vector.x - this.getPosition().x, 2) + Math.pow(vector.y - this.getPosition().y, 2));
 			node.distanceFromBot = distance;
-			if ( Math.abs(changeInOr) < (GlobalSetting.maxVisionAngle/2) && distance < 250)
+			//if ( Math.abs(changeInOr) < (GlobalSetting.maxVisionAngle/2) && distance < 250)
+			if ( Math.abs(changeInOr) < (GlobalSetting.maxVisionAngle/2) && distance < (GlobalSetting.maxVisionRange+30))
 			{
 				if(!PublicGraph.graphGenerator.checkObstacle(vector) &&
 						!PublicGraph.graphGenerator.checkSafeSpots(vector))

@@ -99,7 +99,7 @@ public class GraphGenerator {
 				
 			}
 			else{
-			
+/*			
 				//Left up i- GlobalSetting.tileNumber -1
 				if((currentIndex-GlobalSetting.tileNumber-1)>=0 ){
 					distance = operK.getDisBy2Points(nodeList.get(currentIndex-GlobalSetting.tileNumber-1), nodeList.get(currentIndex));
@@ -110,6 +110,7 @@ public class GraphGenerator {
 						edgeNumber++;
 					}
 				}
+*/
 				// up i- GlobalSetting.tileNumber
 				if((currentIndex-GlobalSetting.tileNumber)>=0 ){
 					distance = operK.getDisBy2Points(nodeList.get(currentIndex-GlobalSetting.tileNumber), nodeList.get(currentIndex));
@@ -120,6 +121,7 @@ public class GraphGenerator {
 					}
 				}
 	
+/*
 				// right up  i- GlobalSetting.tileNumber +1
 				if((currentIndex-GlobalSetting.tileNumber+1)>=0 ){
 					distance = operK.getDisBy2Points(nodeList.get(currentIndex-GlobalSetting.tileNumber+1), nodeList.get(currentIndex));
@@ -129,6 +131,7 @@ public class GraphGenerator {
 						edgeNumber++;
 					}
 				}			
+*/
 				//left  i-1
 				if((currentIndex-1)>=0 ){
 					distance = operK.getDisBy2Points(nodeList.get(currentIndex-1), nodeList.get(currentIndex));

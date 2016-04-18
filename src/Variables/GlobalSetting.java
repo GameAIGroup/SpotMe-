@@ -48,6 +48,8 @@ public class GlobalSetting {
 	public static boolean[] haveGun;
 	public static float[] distance2Player;
 
+	public static int botMode;
+	
 	
 	public GlobalSetting(){
 		screenWidth = 800;
@@ -57,40 +59,20 @@ public class GlobalSetting {
 
 		numberOfBread = 1;
 		
-		tileNumber = 50;
-		nodeSize = 5;
-		obstacleMargin = 3;
-		
-		numberOfbots = 1;
-		wanderTimeBound = 5;
+		numberOfbots = 2;
+		wanderTimeBound = 20;
 		
 		
 		//weapon
-		minusPoint =  5;
-		haveGun = new boolean[numberOfbots];
-		distance2Player = new float[numberOfbots];
-		for(int i = 0 ; i< numberOfbots; i++){
-			if(i == 0 ){
-				//default weapon is in bot 0
-				haveGun[i] = true;
-			}
-			distance2Player[i] = Float.POSITIVE_INFINITY;
- 		}
-		
-		
-		
-		//prediction------------------------------------------------------------------------------------------
-		predictions = new Predictions(numberOfbots);
-		pastPosition = new Vector2[numberOfbots];
-		for(int i = 0 ; i< numberOfbots; i++){
-			pastPosition[i] = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
- 		}
+		minusPoint =  10;
+
+		initialBot();
 		//End of prediction------------------------------------------------------------------------------------
 		
-		keyMoveDistance = 5;
+		keyMoveDistance = 10;
 		
 		sizeOfSafeSpot = 50;
-		numberOfSafeSpot = 8;
+		numberOfSafeSpot = 3;
 		
 		characterHealthPoints = 200;
 		characterMaxHealth = 200;
@@ -101,19 +83,39 @@ public class GlobalSetting {
 		LevelControl = 0;
 		LevelNumber = 3;
 		
-		tileNumber = 100;
-		nodeSize = 5;
+		tileNumber = 50;
+		nodeSize = 10;
 		obstacleMargin = 3;
 
 
-		maxVisionAngle = 0.6;
-		maxVisionRange = 200;
-		maxShootRange = 200;
+		maxVisionAngle = Math.PI*4/5;
+		maxVisionRange = 100;
+		maxShootRange = 100;
 
 		
-		maxVisionAngle = 0.6;
+		//maxVisionAngle = 0.6;
 		
 		playerAIEnable = true;
+		botMode = 0;
+		
 
+	}
+	public static void initialBot(){
+		haveGun = new boolean[numberOfbots];
+		distance2Player = new float[numberOfbots];
+		for(int i = 0 ; i< numberOfbots; i++){
+			if(i == 0 ){
+				//default weapon is in bot 0
+				haveGun[i] = true;
+			}
+			distance2Player[i] = Float.POSITIVE_INFINITY;
+ 		}
+		
+		//prediction------------------------------------------------------------------------------------------
+		predictions = new Predictions(numberOfbots);
+		pastPosition = new Vector2[numberOfbots];
+		for(int i = 0 ; i< numberOfbots; i++){
+			pastPosition[i] = new Vector2(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
+ 		}
 	}
 }
