@@ -90,7 +90,7 @@ public class GlobalSetting {
 
 
 		maxVisionAngle = Math.toRadians(100);
-		maxVisionRange = 100;
+		maxVisionRange = 80;
 		maxShootRange = 100;
 
 		

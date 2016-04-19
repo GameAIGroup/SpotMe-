@@ -254,15 +254,15 @@ public class MainProgram extends PApplet{
 		{
 			String time = gameTime.computeTime( gameTime.getTimeDiffer());
 			System.out.println("===============");
-			System.out.println("1. AI Mode: "+GlobalSetting.AIMode);
-			System.out.println("2. reduce health per attack: "+GlobalSetting.minusPoint );
-			System.out.println("3. safespot: "+GlobalSetting.numberOfSafeSpot );
-			System.out.println("4. bot vision angle: "+Math.toDegrees(GlobalSetting.maxVisionAngle) );
-			System.out.println("5. bot vision range: "+GlobalSetting.maxShootRange );
-			System.out.println("6. bot mode: "+GlobalSetting.botMode );
+			System.out.print(" 1. AI Mode: "+GlobalSetting.AIMode);
+			System.out.print(", 2. reduce health per attack: "+GlobalSetting.minusPoint );
+			System.out.print(", 3. safespot: "+GlobalSetting.numberOfSafeSpot );
+			System.out.print(", 4. bot vision angle: "+Math.toDegrees(GlobalSetting.maxVisionAngle) );
+			System.out.print(", 5. bot vision range: "+GlobalSetting.maxShootRange );
+			System.out.println(", 6. bot mode: "+GlobalSetting.botMode );
 			
-			System.out.println("7. finish in " +GlobalSetting.LevelControl+ " sec");
-			System.out.println("8. remaining health "+(GlobalSetting.characterLives*GlobalSetting.characterMaxHealth +  GlobalSetting.characterHealthPoints) );
+			System.out.print(" 7. finish level " + GlobalSetting.LevelControl +" in " +time+ " sec");
+			System.out.println(", 8. remaining health "+(GlobalSetting.characterLives*GlobalSetting.characterMaxHealth +  GlobalSetting.characterHealthPoints) );
 			System.out.println("===============");
 
 			
