@@ -693,7 +693,7 @@ public class CharacterDrop {
 			float tempSafeDis;
 			int safeIndex = -1;
 			for(int safeIter =0; safeIter < safespotPoints.size(); safeIter++){
-				if(safespotPoints.get(safeIter).y < getPosition().y){
+				if(safespotPoints.get(safeIter).y < getPosition().y+10){
 					safeIndex = safeIter;
 				}
 			}
@@ -741,7 +741,7 @@ public class CharacterDrop {
 			int safeIndex = -1;
 			for(int safeIter =0; safeIter < safespotPoints.size(); safeIter++){
 				float distance2Safe = operK.getDisBy2Points(safespotPoints.get(safeIter), getPosition());
-				if(safespotPoints.get(safeIter).y < getPosition().y && distance2Safe < GlobalSetting.fleeDistance){
+				if(safespotPoints.get(safeIter).y < getPosition().y+10 && distance2Safe < GlobalSetting.fleeDistance){
 					safeIndex = safeIter;
 				}
 			}

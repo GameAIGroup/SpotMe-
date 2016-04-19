@@ -253,9 +253,19 @@ public class MainProgram extends PApplet{
 		if ((character.getPosition().x > 620) && (character.getPosition().y < 30))
 		{
 			String time = gameTime.computeTime( gameTime.getTimeDiffer());
-			System.out.println("System: finishe level " +GlobalSetting.LevelControl+ ", in " + time);
-			System.out.println("System: remaining lives "+GlobalSetting.characterLives + " remaining health points " + GlobalSetting.characterHealthPoints);
+			System.out.println("===============");
+			System.out.println("1. AI Mode: "+GlobalSetting.AIMode);
+			System.out.println("2. reduce health per attack: "+GlobalSetting.minusPoint );
+			System.out.println("3. safespot: "+GlobalSetting.numberOfSafeSpot );
+			System.out.println("4. bot vision angle: "+Math.toDegrees(GlobalSetting.maxVisionAngle) );
+			System.out.println("5. bot vision range: "+GlobalSetting.maxShootRange );
+			System.out.println("6. bot mode: "+GlobalSetting.botMode );
+			
+			System.out.println("7. finish in " +GlobalSetting.LevelControl+ " sec");
+			System.out.println("8. remaining health "+(GlobalSetting.characterLives*GlobalSetting.characterMaxHealth +  GlobalSetting.characterHealthPoints) );
+			System.out.println("===============");
 
+			
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
 			//GlobalSetting.LevelControl = GlobalSetting.LevelControl +1;
 			GlobalSetting.numberOfbots = GlobalSetting.numberOfbots+(1+GlobalSetting.LevelControl);
@@ -639,7 +649,7 @@ public class MainProgram extends PApplet{
 								if(GlobalSetting.characterLives > 0){
 									GlobalSetting.characterLives = GlobalSetting.characterLives -1;
 									GlobalSetting.characterHealthPoints = GlobalSetting.characterMaxHealth;
-									character.updatePosition(new Vector2(200, 500));
+									//character.updatePosition(new Vector2(200, 500));
 									//re born to original points.
 								}
 								else{

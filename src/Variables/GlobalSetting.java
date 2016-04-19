@@ -65,7 +65,7 @@ public class GlobalSetting {
 		
 		
 		//weapon
-		minusPoint =  15;
+		minusPoint =  10;
 
 		initialBot();
 		//End of prediction------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ public class GlobalSetting {
 		keyMoveDistance = 10;
 		
 		sizeOfSafeSpot = 50;
-		numberOfSafeSpot = 5;
+		numberOfSafeSpot = 8;
 		
 		characterHealthPoints = 200;
 		characterMaxHealth = 200;
@@ -89,7 +89,7 @@ public class GlobalSetting {
 		obstacleMargin = 3;
 
 
-		maxVisionAngle = Math.toRadians(80);
+		maxVisionAngle = Math.toRadians(100);
 		maxVisionRange = 100;
 		maxShootRange = 100;
 
@@ -97,9 +97,9 @@ public class GlobalSetting {
 		//maxVisionAngle = 0.6;
 		
 		playerAIEnable = true;
-		botMode = 1;
-		AIMode = 0;
-		fleeDistance = 200;
+		botMode = 0;
+		AIMode = 7;
+		fleeDistance = 150;
 		
 
 	}
