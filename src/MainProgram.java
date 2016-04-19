@@ -254,6 +254,7 @@ public class MainProgram extends PApplet{
 		{
 			String time = gameTime.computeTime( gameTime.getTimeDiffer());
 			System.out.println("System: finishe level " +GlobalSetting.LevelControl+ ", in " + time);
+			System.out.println("System: remaining lives "+GlobalSetting.characterLives + " remaining health points " + GlobalSetting.characterHealthPoints);
 
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
 			//GlobalSetting.LevelControl = GlobalSetting.LevelControl +1;
@@ -450,6 +451,9 @@ public class MainProgram extends PApplet{
 					
 				}
 				else{//no player around
+					//wander;
+					Bot[botIter].isWanderMode();
+
 					if( inSafeSpot == true ){
 						//wander;
 						Bot[botIter].isWanderMode();
@@ -544,6 +548,8 @@ public class MainProgram extends PApplet{
 						
 						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
 					}
+
+
 				}
 			}
 			else{
@@ -599,7 +605,7 @@ public class MainProgram extends PApplet{
 
 		
 		//make decisions in 0.02 sec frequency
-		if(botDecisionTimer.checkTimeSlot(150)){
+		if(botDecisionTimer.checkTimeSlot(100)){
 			//bot decision cycle
 			count = (count +1)%100;
 			//For testing safe spots
