@@ -252,20 +252,19 @@ public class MainProgram extends PApplet{
 		//System.out.println(character.getPosition().x+ ", " +character.getPosition().y);
 		if ((character.getPosition().x > 620) && (character.getPosition().y < 30))
 		{
+			if(GlobalSetting.LevelControl == 0){
+				System.out.println("________________________________________________________________________");
+				System.out.print(" AI Mode: "+GlobalSetting.AIMode);
+				System.out.print(", Reduce health per attack: "+GlobalSetting.minusPoint );
+				System.out.print(", Safespot: "+GlobalSetting.numberOfSafeSpot );
+				System.out.println(", Bot mode: "+GlobalSetting.botMode );	
+				System.out.print(" Bot vision angle: "+Math.toDegrees(GlobalSetting.maxVisionAngle) );
+				System.out.println(", Bot vision range: "+GlobalSetting.maxShootRange );		
+			}
 			String time = gameTime.computeTime( gameTime.getTimeDiffer());
-			System.out.println("===============");
-			System.out.print(" 1. AI Mode: "+GlobalSetting.AIMode);
-			System.out.print(", 2. reduce health per attack: "+GlobalSetting.minusPoint );
-			System.out.print(", 3. safespot: "+GlobalSetting.numberOfSafeSpot );
-			System.out.print(", 4. bot vision angle: "+Math.toDegrees(GlobalSetting.maxVisionAngle) );
-			System.out.print(", 5. bot vision range: "+GlobalSetting.maxShootRange );
-			System.out.println(", 6. bot mode: "+GlobalSetting.botMode );
-			
-			System.out.print(" 7. finish level " + GlobalSetting.LevelControl +" in " +time+ " sec");
-			System.out.println(", 8. remaining health "+(GlobalSetting.characterLives*GlobalSetting.characterMaxHealth +  GlobalSetting.characterHealthPoints) );
-			System.out.println("===============");
-
-			
+			System.out.print(" Finish level " + GlobalSetting.LevelControl +" in " +time+ " sec");
+			System.out.println(", Remaining health "+(GlobalSetting.characterLives*GlobalSetting.characterMaxHealth +  GlobalSetting.characterHealthPoints) );
+			System.out.println("________________________________________________________________________");
 			GlobalSetting.LevelControl = (GlobalSetting.LevelControl+1)%GlobalSetting.LevelNumber;
 			//GlobalSetting.LevelControl = GlobalSetting.LevelControl +1;
 			GlobalSetting.numberOfbots = GlobalSetting.numberOfbots+(1+GlobalSetting.LevelControl);
@@ -275,8 +274,8 @@ public class MainProgram extends PApplet{
 			if(GlobalSetting.LevelControl == 0 && winCheck == false){
 				winCheck = true;
 			}
-
 		}
+	
 	}
 /*
  * 	(non-Javadoc)

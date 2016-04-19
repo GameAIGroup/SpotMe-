@@ -65,7 +65,7 @@ public class GlobalSetting {
 		
 		
 		//weapon
-		minusPoint =  10;
+		minusPoint =  20;
 
 		initialBot();
 		//End of prediction------------------------------------------------------------------------------------
@@ -97,10 +97,10 @@ public class GlobalSetting {
 		//maxVisionAngle = 0.6;
 		
 		playerAIEnable = true;
-		botMode = 0;
-		AIMode = 7;
+		botMode = 1;
+		AIMode = 2;
 		fleeDistance = 150;
-		
+								
 
 	}
 	public static void initialBot(){
