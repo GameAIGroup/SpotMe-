@@ -553,10 +553,10 @@ public class MainProgram extends PApplet{
 							//Bot[botIter].Seek(myprediction);
 						}
 						
-						
-						
 						//---Seek.updateTargetPosition(Bot[1].getMyPrediction());
 					}
+						
+					
 
 
 				}

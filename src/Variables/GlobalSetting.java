@@ -65,7 +65,7 @@ public class GlobalSetting {
 		
 		
 		//weapon
-		minusPoint =  20;
+		minusPoint =  10;
 
 		initialBot();
 		//End of prediction------------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ public class GlobalSetting {
 		
 		playerAIEnable = true;
 		botMode = 1;
-		AIMode = 2;
+		AIMode = 6;
 		fleeDistance = 150;
 								
 
