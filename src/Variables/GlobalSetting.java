@@ -96,7 +96,7 @@ public class GlobalSetting {
 		
 		//maxVisionAngle = 0.6;
 		
-		playerAIEnable = true;
+		playerAIEnable = false;
 		botMode = 1;
 		AIMode = 6;
 		fleeDistance = 150;
